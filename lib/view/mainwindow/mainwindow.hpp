@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 
+#include "beaconeditor.hpp"
+#include "scene.hpp"
+
 QT_BEGIN_NAMESPACE
 
 namespace Ui {
@@ -21,6 +24,9 @@ public:
 
 private:
     Ui::MainWindow *m_ui;
+
+    BeaconEditor *m_beaconEditor;
+    Scene *m_scene;
 };
 
 #endif //APP_MAINWINDOW_HPP
