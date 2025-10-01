@@ -1,0 +1,16 @@
+qt_add_library(model STATIC
+        abstractitem.hpp
+        beacon.hpp
+        beacons.cpp
+        beacons.hpp
+        espobject.hpp
+        model.cpp
+        model.hpp
+)
+
+target_link_libraries(model PUBLIC
+        Qt6::Core
+        Qt6::Widgets
+)
+
+target_include_directories(model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

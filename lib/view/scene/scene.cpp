@@ -1,5 +1,5 @@
 #include "scene.hpp"
- #include <QTimer>
+#include <QTimer>
 #include <cmath>
 #include <QGraphicsView>
 #include <QVBoxLayout>
@@ -8,7 +8,7 @@
 #include "espitem.hpp"
 #include "griditem.hpp"
 
-Scene::Scene(QWidget *parent)
+Scene::Scene(std::shared_ptr<Model> model, QWidget *parent)
     : QWidget(parent),
       m_scene(new QGraphicsScene(this)),
       m_view(new QGraphicsView(m_scene, this)),
@@ -25,9 +25,9 @@ Scene::Scene(QWidget *parent)
     m_view->setDragMode(QGraphicsView::ScrollHandDrag);
 
     // Добавляем элементы
-    m_scene->addItem(new GridItem(50));                  // сетка
-    m_scene->addItem(new BeaconItem(-200, -100));        // маяки
-    m_scene->addItem(new BeaconItem(150,  150));
+    m_scene->addItem(new GridItem(50)); // сетка
+    m_scene->addItem(new BeaconItem(-200, -100)); // маяки
+    m_scene->addItem(new BeaconItem(150, 150));
     m_scene->addItem(new BeaconItem(300, -200));
 
     // Приёмник и путь

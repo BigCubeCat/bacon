@@ -9,6 +9,7 @@ qt_add_library(scene STATIC
 target_link_libraries(scene PUBLIC
         Qt6::Core
         Qt6::Widgets
+        model
 )
 
 target_include_directories(scene PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

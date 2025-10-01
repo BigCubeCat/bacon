@@ -9,6 +9,7 @@ target_link_libraries(mainwindow PUBLIC
         Qt6::Widgets
         beaconeditor
         scene
+        model
 )
 
 target_include_directories(mainwindow PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

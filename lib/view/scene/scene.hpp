@@ -6,13 +6,14 @@
 #include <QVBoxLayout>
 
 #include "espitem.hpp"
+#include "model.hpp"
 
 class Scene : public QWidget {
     Q_OBJECT
 
 public:
-    explicit Scene(QWidget *parent = nullptr);
-    ~Scene();
+    explicit Scene(std::shared_ptr<Model> model,  QWidget *parent = nullptr);
+    ~Scene() override;
 
 private:
     QGraphicsScene *m_scene;

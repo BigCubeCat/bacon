@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "beaconeditor.hpp"
+#include "model.hpp"
 #include "scene.hpp"
 
 QT_BEGIN_NAMESPACE
@@ -18,12 +19,14 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(std::shared_ptr<Model> model, QWidget *parent = nullptr);
 
     ~MainWindow() override;
 
 private:
     Ui::MainWindow *m_ui;
+
+    std::shared_ptr<Model> m_model;
 
     BeaconEditor *m_beaconEditor;
     Scene *m_scene;

@@ -23,5 +23,6 @@ target_link_libraries(app
         Qt::Gui
         Qt::Widgets
         mainwindow
+        model
 )
 
