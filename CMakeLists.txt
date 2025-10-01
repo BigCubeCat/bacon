@@ -13,10 +13,15 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 
+qt6_add_resources(RESOURCES resources.qrc)
+
+add_subdirectory(lib/view)
+
 add_executable(app main.cpp)
 target_link_libraries(app
         Qt::Core
         Qt::Gui
         Qt::Widgets
+        mainwindow
 )
 
