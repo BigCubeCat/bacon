@@ -4,6 +4,7 @@
 #include <QGraphicsView>
 #include <QMainWindow>
 #include <QVBoxLayout>
+#include <QPropertyAnimation>
 
 #include "espitem.hpp"
 #include "model.hpp"
@@ -26,6 +27,11 @@ class Scene : public QWidget {
     EspItem* m_esp;
 
     QVBoxLayout* m_layout;
+
+    QPropertyAnimation* m_animVert;
+    QPropertyAnimation* m_animHoriz;
+
+    void centerEsp();
 
     void setupBasicScene();
 

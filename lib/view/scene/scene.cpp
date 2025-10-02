@@ -33,6 +33,7 @@ Scene::Scene(Model *model, QWidget *parent)
         COUNT_CELLS * CELL_SIZE * 2, COUNT_CELLS * CELL_SIZE * 2);
     m_view->setBackgroundBrush(QBrush(kBackgroundColor));
 
+
     setupBasicScene();
 }
 
@@ -60,7 +61,7 @@ void Scene::keyPressEvent(QKeyEvent *event) {
 void Scene::setupBasicScene() {
     clearScene();
     m_scene->addItem(new GridItem(CELL_SIZE)); // сетка
-    m_esp = new EspItem(10);
+    m_esp = new EspItem("CONNECTED", 10);
     m_scene->addItem(m_esp);
     m_esp->setPos(0, 0);
     m_pathItems = new QGraphicsPathItem();
@@ -86,6 +87,7 @@ void Scene::espChanged() {
     const auto eo = m_model->esp();
     const auto pos = eo.pos();
     m_esp->setPos(pos.x() * CELL_SIZE, -pos.y() * CELL_SIZE);
+    m_esp->setStatus("CONNECTED");
     const auto path = m_model->path();
     auto p = m_pathItems->path();
     if (path.isEmpty()) {
@@ -95,6 +97,6 @@ void Scene::espChanged() {
     }
     m_scene->addItem(new PointItem(pos.x(), pos.y(), kPathColor[1], 2));
     m_pathItems->setPath(p);
-    m_view->centerOn(m_esp);
+
     update();
 }

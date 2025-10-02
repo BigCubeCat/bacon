@@ -30,4 +30,14 @@ const QColor kGridColor = QColor("#dadaea");
 const QColor kTextLight = QColor("#ffffff");
 const QColor kBgDark = QColor("#000000");
 
+const QColor kGreen[6] = {
+    QColor("#20231E"),
+    QColor("#233324"),
+    QColor("#2D482A"),
+    QColor("#356434"),
+    QColor("#5B924B"),
+    QColor("#20231Eee"),
+};
+const QColor kSuccess = QColor("#ffffff");
+
 #endif //APP_CONST_HPP
