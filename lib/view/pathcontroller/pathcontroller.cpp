@@ -70,12 +70,14 @@ PathController::~PathController() {
     delete m_ui;
 }
 
-void PathController::setPath(const QList<QPointF>& path) {
-    m_list->setRowCount(path.size());
+void PathController::setPath() {
+    const auto path = m_model->path();
+    const auto size = path.size();
+    m_list->setRowCount(size);
     for (int row = 0; row < path.size(); ++row) {
-        const QPointF& p = path[row];
-        m_list->setItem(row, 0, new QStandardItem(QString::number(p.x())));
-        m_list->setItem(row, 1, new QStandardItem(QString::number(p.y())));
+        const QPointF &p = path[row];
+        m_list->setItem(size - row - 1, 0, new QStandardItem(QString::number(p.x())));
+        m_list->setItem(size - row - 1, 1, new QStandardItem(QString::number(p.y())));
     }
 
     m_ui->tableView->horizontalHeader()->setSectionResizeMode(

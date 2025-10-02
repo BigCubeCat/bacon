@@ -34,4 +34,3 @@ target_link_libraries(app
         mainwindow
         model
 )
-

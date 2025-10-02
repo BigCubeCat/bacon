@@ -13,7 +13,7 @@
 
 class BeaconItem : public QGraphicsEllipseItem {
 public:
-    BeaconItem(const QString &name, qreal x, qreal y, qreal radius = 3.0)
+    BeaconItem(const QString &name, qreal x, qreal y, qreal radius = 12.0)
         : QGraphicsEllipseItem(-radius, -radius, radius * 2, radius * 2),
           m_name(QString("%1\n(%2, %3)").arg(name).arg(x).arg(y)), m_x(x), m_y(y), m_radius(radius) {
         setPos(x * CELL_SIZE, -y * CELL_SIZE);

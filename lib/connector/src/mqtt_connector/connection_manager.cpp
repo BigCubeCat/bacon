@@ -1,9 +1,50 @@
 #include "mqtt_connector/connection_manager.h"
+#include "mqtt_connector/mqtt_client.h"
+#include "message_objects/BLE.h"
 
 #include <mqtt/async_client.h>
 #include <mqtt/callback.h>
 #include <mqtt/ssl_options.h>
 #include <chrono>
+#include <fstream>
+
+#include <json.hpp>
+
+class Callback : public virtual mqtt::callback {
+
+public:
+    explicit Callback(mqtt_connector::MqttClient* mgr) : mgr_(mgr) {}
+
+    void message_arrived(mqtt::const_message_ptr msg) override {
+        // std::ofstream out;
+
+        // out.open("TmpFile.txt", std::ios::app);
+        // out << "Message received: " << msg->get_payload_str() << "\n";
+        // out.close();
+
+        // std::cout << "Message received: " << msg->get_payload_str() << std::endl;
+
+        if (!mgr_) return;
+
+        try {
+            nlohmann::json json_data = nlohmann::json::parse(msg->get_payload_str());
+
+            if (!mgr_->BLEBeaconContains(json_data["name"])) return;
+
+            message_objects::BLEBeaconState state;
+            state.name_ = json_data["name"];
+            state.txPower_ = json_data["tx_power"];
+            state.rssi_ = json_data["rssi"];
+            
+            mgr_->addBLEBeaconState(json_data["name"], state);
+        } catch (const nlohmann::json::exception& e) {
+            std::cerr << "JSON parsing error: " << e.what() << std::endl;
+        }
+    }
+
+private:
+    mqtt_connector::MqttClient* mgr_;
+};
 
 namespace mqtt_connector {
 
@@ -34,6 +75,7 @@ ConnectionManager::ConnectionManager()
     , auto_reconnect_(false)
     , retry_interval_(5)
     , should_stop_(false) {
+        cb_ = nullptr;
 }
 
 ConnectionManager::~ConnectionManager() {
@@ -42,6 +84,11 @@ ConnectionManager::~ConnectionManager() {
     should_stop_ = true;
     if (reconnect_thread_.joinable()) {
         reconnect_thread_.join();
+    }
+
+    if (cb_) {
+        delete cb_;
+        cb_ = nullptr;
     }
 }
 
@@ -53,8 +100,17 @@ bool ConnectionManager::connect(const ConnectionConfig& config) {
                                 config.broker_host + ":" + std::to_string(config.broker_port);
         
         client_ = std::make_unique<mqtt::async_client>(server_uri, config.client_id);
-        callback_ = std::make_unique<MqttCallback>(this);
-        client_->set_callback(*callback_);
+        
+        // callback_ = std::make_unique<MqttCallback>(this);
+        // client_->set_callback(*callback_);
+
+        // HardCode:
+        if (cb_) {
+            delete cb_;
+            cb_ = nullptr;
+        }
+        cb_ = new Callback(mgr_);
+        client_->set_callback(*cb_);
         
         mqtt::connect_options connOpts;
         connOpts.set_keep_alive_interval(config.keep_alive_interval);

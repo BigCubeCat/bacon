@@ -46,7 +46,7 @@ QList<QPointF> Model::path() const {
 
 void Model::updateBeacon(int index, const Beacon &beacon) {
     m_beacons[index] = beacon;
-    QList<std::pair<QString, QPointF> > newBeacons;
+    QList<QPair<QString, QPointF> > newBeacons;
     for (int i  = 0; i < m_beacons.size(); ++i) {
         newBeacons.append({m_beacons[i].name(), m_beacons[i].pos()});
     }
@@ -55,7 +55,7 @@ void Model::updateBeacon(int index, const Beacon &beacon) {
 
 void Model::addBeacon(const Beacon &beacon) {
     m_beacons.append(beacon);
-    QList<std::pair<QString, QPointF> > newBeacons;
+    QList<QPair<QString, QPointF> > newBeacons;
     for (int i  = 0; i < m_beacons.size(); ++i) {
         newBeacons.append({m_beacons[i].name(), m_beacons[i].pos()});
     }
@@ -64,7 +64,7 @@ void Model::addBeacon(const Beacon &beacon) {
 
 void Model::beaconChanged(const QList<Beacon> &beacons) {
     m_beacons = beacons;
-    QList<std::pair<QString, QPointF> > newBeacons;
+    QList<QPair<QString, QPointF> > newBeacons;
     for (int i  = 0; i < m_beacons.size(); ++i) {
         newBeacons.append({m_beacons[i].name(), m_beacons[i].pos()});
     }
@@ -87,6 +87,11 @@ void Model::onChangeFreq(float freq) {
 void Model::onUrlChanged(const QString &url) {
     m_url = url;
     emit urlChanged(m_url);
+}
+
+void Model::setPath(const QList<QPointF>& path) {
+    m_path = path;
+    emit pathChanged();
 }
 
 void Model::onStopped() {

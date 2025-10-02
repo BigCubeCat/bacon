@@ -4,6 +4,8 @@ qt_add_library(model STATIC
         espobject.hpp
         model.cpp
         model.hpp
+        model_utils.cpp
+        model_utils.hpp
 )
 
 target_link_libraries(model PUBLIC

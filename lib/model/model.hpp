@@ -41,7 +41,7 @@ class Model : public QObject {
 
     void oneBeaconChanged(int index);
 
-    void signalBeaconsChanged(const QList<std::pair<QString, QPointF>> &newBeacons);
+    void signalBeaconsChanged(const QList<QPair<QString, QPointF>> &newBeacons);
 
     void freqChanged(float f);
 
@@ -63,6 +63,7 @@ class Model : public QObject {
     void pointAdded(const QPointF& point);
     void onChangeFreq(float freq);
     void onUrlChanged(const QString& url);
+    void setPath(const QList<QPointF>& path);
 
     void onStopped();
     void onStarted();

@@ -95,5 +95,6 @@ void Scene::espChanged() {
     }
     m_scene->addItem(new PointItem(pos.x(), pos.y(), kPathColor[1], 2));
     m_pathItems->setPath(p);
+    m_view->centerOn(m_esp);
     update();
 }

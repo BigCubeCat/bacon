@@ -1,4 +1,5 @@
 # cmake_minimum_required(VERSION 3.16)
+
 project(connector VERSION 1.0.0)
 
 # set(CMAKE_CXX_STANDARD 17)
@@ -7,6 +8,7 @@ project(connector VERSION 1.0.0)
 # option(BUILD_STATIC "Build static library" ON)
 
 find_package(Threads REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 # set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};~/Qt/6.8.3/gcc_64")
 
@@ -19,6 +21,8 @@ set(CONNECTOR_SOURCES
     src/mqtt_connector/mqtt_client.cpp
     src/mqtt_connector/message_handler.cpp
     src/mqtt_connector/connection_manager.cpp
+    src/navigator/navigator.cpp
+    src/config/config.cpp
 )
 
 set(CONNECTOR_HEADERS
@@ -28,6 +32,8 @@ set(CONNECTOR_HEADERS
     include/mqtt_connector/types.h
     include/message_objects/BLE.h
     include/navigator/navigator.h
+    include/config/config.h
+    include/json.hpp
 )
 
 qt_add_library(
@@ -114,6 +120,7 @@ target_link_libraries(connector
     ${PAHO_MQTT_LIBRARIES}
     Threads::Threads
     Qt6::Core
+    Eigen3::Eigen
 )
 
 if(PAHO_MQTT_CPP_FOUND AND PAHO_MQTT_CPP_CFLAGS_OTHER)
