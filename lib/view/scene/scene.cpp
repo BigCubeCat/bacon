@@ -8,7 +8,9 @@
 #include "espitem.hpp"
 #include "griditem.hpp"
 
-Scene::Scene(std::shared_ptr<Model> model, QWidget *parent)
+Scene::Scene(Model *model,
+             QWidget *parent
+)
     : QWidget(parent),
       m_scene(new QGraphicsScene(this)),
       m_view(new QGraphicsView(m_scene, this)),
@@ -49,7 +51,6 @@ Scene::Scene(std::shared_ptr<Model> model, QWidget *parent)
 }
 
 Scene::~Scene() {
-    delete m_scene;
     delete m_view;
     delete m_timer;
     delete m_esp;

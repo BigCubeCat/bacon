@@ -3,7 +3,7 @@
 #include "ui_mainwindow.h"
 
 
-MainWindow::MainWindow(std::shared_ptr<Model> model, QWidget *parent)
+MainWindow::MainWindow(Model *model, QWidget *parent)
     : QMainWindow(parent),
       m_ui(new Ui::MainWindow),
       m_model(model),

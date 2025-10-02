@@ -12,7 +12,7 @@ class Scene : public QWidget {
     Q_OBJECT
 
 public:
-    explicit Scene(std::shared_ptr<Model> model,  QWidget *parent = nullptr);
+    explicit Scene(Model * model,  QWidget *parent = nullptr);
     ~Scene() override;
 
 private:

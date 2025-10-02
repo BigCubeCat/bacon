@@ -6,7 +6,7 @@
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     std::shared_ptr<Model> model = std::make_shared<Model>();
-    MainWindow window(model);
+    MainWindow window(model.get());
 
     window.resize(1200, 800);
     window.show();
