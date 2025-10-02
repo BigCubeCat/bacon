@@ -31,8 +31,8 @@ MainWindow::MainWindow(Model* model, QWidget* parent)
             &BeaconEditor::updateBeacons);
     connect(m_model, &Model::signalBeaconsChanged, m_scene,
             &Scene::beaconChanged);
-    connect(m_pathController, &PathController::urlChanged, 
-            m_model, &Model::onUrlChanged);
+    connect(m_pathController, &PathController::urlChanged, m_model,
+            &Model::onUrlChanged);
 
     connect(m_model, &Model::dataChanged, m_scene, &Scene::espChanged);
     connect(m_model, &Model::pointAddedSignal, m_pathController,
@@ -55,8 +55,12 @@ MainWindow::MainWindow(Model* model, QWidget* parent)
     connect(m_ui->actionSave_Path, &QAction::triggered, this,
             &MainWindow::savePathFile);
 
-    connect(m_model, &Model::pathChanged, m_pathController, &PathController::setPath);
-    
+    connect(m_model, &Model::pathChanged, m_pathController,
+            &PathController::setPath);
+
+    connect(m_pathController, &PathController::pathReseted, m_model,
+            &Model::onResetPath);
+
     m_beaconEditor->acceptedSlot();
 }
 

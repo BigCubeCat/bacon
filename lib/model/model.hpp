@@ -71,6 +71,8 @@ class Model : public QObject {
     void onStopped();
     void onStarted();
 
+    void onResetPath();
+
     void onStatusChanged(const QString& status);
 };
 

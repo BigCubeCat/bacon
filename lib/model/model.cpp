@@ -108,6 +108,11 @@ void Model::onStarted() {
     m_running = true;
 }
 
+void Model::onResetPath() {
+    m_path.clear();
+    emit pathChanged();
+}
+
 void Model::onStatusChanged(const QString& status) {
     m_status = status;
 }
