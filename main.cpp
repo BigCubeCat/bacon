@@ -24,6 +24,7 @@ int main(int argc, char* argv[]) {
                      model.get(), &Model::addPointToPath);
 
     QObject::connect(model.get(), &Model::urlChanged, conn.get(), &mqtt_connector::MqttClient::initOnChange);
+    QObject::connect(model.get(), &Model::freqChanged, conn.get(), &mqtt_connector::MqttClient::setFreqOnChange);
 
     // Создаем таймер
     QTimer timer;

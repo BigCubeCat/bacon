@@ -4,6 +4,7 @@
 #include "message_handler.h"
 #include "message_objects/BLE.h"
 #include "connection_manager.h"
+#include "navigator/navigator.h"
 
 #include <mqtt/callback.h>
 #include <memory>
@@ -118,8 +119,6 @@ public:
      */
     std::string getStatus() const;
 
-    const std::vector<message_objects::BLEBeacon>& getBeacons() const { return m_beacons; }
-
     void setBLEBeaconState(const std::string& key, const std::vector<message_objects::BLEBeaconState>& states);
     void addBLEBeaconState(const std::string& key, const message_objects::BLEBeaconState& state);
     
@@ -135,7 +134,8 @@ public:
 
 public slots:
     void initOnChange(const QString &url);
-    void setFreqOnChange(float freq);    
+    void setFreqOnChange(float freq);
+    // void setBeacons(const QList<std::pair<QString, QPointF>> &newBeacons);
 
 private:
     std::unique_ptr<ConnectionManager> connection_manager_;
@@ -159,11 +159,15 @@ private:
     void restoreSubscriptions();
 
     float m_freq = 1.0f;
+    mutable std::mutex m_freq_mutex_;
 
     std::map<std::string, std::vector<message_objects::BLEBeaconState>> m_data;
     mutable std::mutex m_data_mutex_;
 
     std::vector<message_objects::BLEBeacon> m_beacons;
+    mutable std::mutex m_beacons_mutex_;
+
+    std::unique_ptr<navigator::Navigator> navigator_;
 };
 
 } // namespace mqtt_connector

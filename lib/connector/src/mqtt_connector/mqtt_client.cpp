@@ -263,7 +263,7 @@ void MqttClient::addBLEBeaconState(const std::string& key, const message_objects
 }
 
 bool MqttClient::BLEBeaconContains(const std::string& name) {
-    std::lock_guard<std::mutex> lock(m_data_mutex_);
+    std::lock_guard<std::mutex> lock(m_beacons_mutex_);
     return std::any_of(m_beacons.begin(), m_beacons.end(), [&name](const message_objects::BLEBeacon& beacon) {
         return beacon.name_ == name;
     });
@@ -291,8 +291,21 @@ void MqttClient::initOnChange(const QString &url) {
 }
 
 void MqttClient::setFreqOnChange(float freq) {
+    std::lock_guard<std::mutex> lock(m_freq_mutex_);
     m_freq = freq;
 }
+
+// void MqttClient::setBeacons(const QList<std::pair<QString, QPointF>> &newBeacons) {
+//     std::lock_guard<std::mutex> lock(m_beacons_mutex_);
+//     m_beacons.clear();
+//     for (const auto& pair : newBeacons) {
+//         message_objects::BLEBeacon beacon;
+//         beacon.name_ = pair.first.toStdString();
+//         beacon.x_ = pair.second.x();
+//         beacon.y_ = pair.second.y();
+//         m_beacons.push_back(beacon);
+//     }
+// }
 
 void MqttClient::onMessageReceived(const Message& message) {
     message_handler_->handleMessage(message);
