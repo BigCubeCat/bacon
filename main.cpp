@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     });
 
     // Таймер срабатывает каждые 1000 мс (1 секунда)
-    timer.start(200);
+    timer.start(2000);
 
     return QApplication::exec();
 }

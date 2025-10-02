@@ -1,4 +1,6 @@
 qt_add_library(scene STATIC
+        const.hpp
+        waveitem.hpp
         griditem.hpp
         beaconitem.hpp
         espitem.hpp
