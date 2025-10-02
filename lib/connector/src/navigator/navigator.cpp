@@ -6,6 +6,10 @@
 #include <numeric>
 #include <Eigen/Dense>
 
+using namespace message_objects;
+
+namespace navigator {
+
 Navigator::Navigator(const std::vector<BLEBeacon> &knownBeacons)
     : knownBeacons_(const_cast<std::vector<BLEBeacon>&>(knownBeacons)) {}
 
@@ -21,7 +25,7 @@ std::pair<double, double> Navigator::calculatePosition(
     std::vector<std::pair<BLEBeacon, double>> distances;
     for (const auto &state : beaconStates) {
         auto it = std::find_if(knownBeacons_.begin(), knownBeacons_.end(),
-                               [&state](const BLEBeacon &b) { return b.name_ == state.name; });
+                               [&state](const BLEBeacon &b) { return b.name_ == state.name_; });
         if (it != knownBeacons_.end()) {
             double d = rssiToDistance(state.rssi_, state.txPower_);
             distances.emplace_back(*it, d);
@@ -67,3 +71,5 @@ std::pair<double, double> Navigator::trilateration(
     // Возвращаем только x, y
     return {position(0), position(1)};
 }
+
+} // namespace navigator

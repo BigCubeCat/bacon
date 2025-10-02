@@ -8,6 +8,7 @@ project(connector VERSION 1.0.0)
 # option(BUILD_STATIC "Build static library" ON)
 
 find_package(Threads REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 # set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};~/Qt/6.8.3/gcc_64")
 
@@ -119,6 +120,7 @@ target_link_libraries(connector
     ${PAHO_MQTT_LIBRARIES}
     Threads::Threads
     Qt6::Core
+    Eigen3::Eigen
 )
 
 if(PAHO_MQTT_CPP_FOUND AND PAHO_MQTT_CPP_CFLAGS_OTHER)

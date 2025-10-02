@@ -1,4 +1,6 @@
 #include "mqtt_connector/connection_manager.h"
+#include "mqtt_connector/mqtt_client.h"
+#include "message_objects/BLE.h"
 
 #include <mqtt/async_client.h>
 #include <mqtt/callback.h>

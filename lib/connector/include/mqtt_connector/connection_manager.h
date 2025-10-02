@@ -6,12 +6,16 @@
 #include <mutex>
 
 #include "types.h"
-#include "mqtt_client.h"
 
 // Forward declarations Paho MQTT
 namespace mqtt {
     class async_client;
     class callback;
+}
+
+// Forward declaration
+namespace mqtt_connector {
+    class MqttClient;
 }
 
 namespace mqtt_connector {
