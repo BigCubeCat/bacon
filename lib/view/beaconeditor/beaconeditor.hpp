@@ -4,6 +4,7 @@
 #include <QWidget>
 
 #include "beacon.hpp"
+#include "model.hpp"
 
 
 QT_BEGIN_NAMESPACE
@@ -19,22 +20,24 @@ class BeaconEditor : public QWidget {
     Q_OBJECT
 
 public:
-    explicit BeaconEditor(QWidget *parent = nullptr);
+    explicit BeaconEditor(Model *m, QWidget *parent = nullptr);
 
     ~BeaconEditor() override;
 
 private:
     Ui::BeaconEditor *m_ui;
+    Model *m_model;
 
-    QList<Beacon *> m_beacons;
+    QList<Beacon> m_beacons;
     void parseBeacons(const QString &text);
 
 public slots:
     void setText(const QString &text);
     void updateText();
+    void updateBeacons();
 
 signals:
-    void accepted(const QList<Beacon*> &beacons);
+    void accepted(const QList<Beacon> &beacons);
 };
 
 

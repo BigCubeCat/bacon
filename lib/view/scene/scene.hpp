@@ -12,7 +12,8 @@ class Scene : public QWidget {
     Q_OBJECT
 
 public:
-    explicit Scene(Model * model,  QWidget *parent = nullptr);
+    explicit Scene(Model *model, QWidget *parent = nullptr);
+
     ~Scene() override;
 
 private:
@@ -23,6 +24,9 @@ private:
     QTimer *m_timer;
 
     QVBoxLayout *m_layout;
+
+public slots:
+    void beaconChanged();
 };
 
 #endif //APP_SCENE_HPP

@@ -1,13 +1,13 @@
 #include "model.hpp"
 
-Model::Model() : m_beacons(), m_esp(QString("esp"), QPointF(10.0, 10.0)) {
+Model::Model() : m_esp(QString("esp"), QPointF(10.0, 10.0)) {
 }
 
 Beacons Model::beacons() const {
     return m_beacons;
 }
 
-Beacon *Model::beacon(int index) const {
+Beacon Model::beacon(int index) const {
     return m_beacons.at(index);
 }
 
@@ -31,12 +31,17 @@ QList<QPointF> Model::path() const {
     return m_path;
 }
 
-void Model::updateBeacon(int index, Beacon *beacon) {
-    auto *old = m_beacons[index];
+void Model::updateBeacon(int index, Beacon beacon) {
     m_beacons[index] = beacon;
-    delete old;
+    emit signalBeaconsChanged();
 }
 
-void Model::addBeacon(Beacon *beacon) {
+void Model::addBeacon(const Beacon &beacon) {
     m_beacons.append(beacon);
+    emit signalBeaconsChanged();
+}
+
+void Model::beaconChanged(const QList<Beacon> &beacons) {
+    m_beacons = beacons;
+    emit signalBeaconsChanged();
 }

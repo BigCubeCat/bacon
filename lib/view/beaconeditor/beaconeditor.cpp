@@ -2,7 +2,7 @@
 
 #include "ui_beaconeditor.h"
 
-BeaconEditor::BeaconEditor(QWidget *parent) : QWidget(parent), m_ui(new Ui::BeaconEditor) {
+BeaconEditor::BeaconEditor(Model *m, QWidget *parent) : QWidget(parent), m_ui(new Ui::BeaconEditor), m_model(m) {
     m_ui->setupUi(this);
     m_ui->plainTextEdit->setPlainText("Name;X;Y\n"
         "beacon_1;3.0;-2.4\n"
@@ -22,7 +22,7 @@ BeaconEditor::~BeaconEditor() {
 }
 
 void BeaconEditor::parseBeacons(const QString &text) {
-    QList<Beacon *> beacons;
+    QList<Beacon> beacons;
     std::istringstream iss(text.toStdString());
     std::string line;
 
@@ -74,7 +74,7 @@ void BeaconEditor::parseBeacons(const QString &text) {
             return;
         }
         const auto value = one.value();
-        beacons.push_back(new Beacon(value.first, value.second, ""));
+        beacons.emplace_back(value.first, value.second, "");
     }
     m_beacons = beacons;
     m_ui->acceptButton->setEnabled(true);
@@ -84,6 +84,18 @@ void BeaconEditor::updateText() {
     const auto text = m_ui->plainTextEdit->toPlainText();
     parseBeacons(text);
     update();
+}
+
+void BeaconEditor::updateBeacons() {
+    const auto beacons = m_model->beacons();
+    QString res = "Name;X;Y\n";
+    for (int i = 0; i < beacons.size(); ++i) {
+        const auto beacon = beacons.at(i);
+        const auto pos = beacon.pos();
+        res += beacon.name() + ";" + QString::fromStdString(std::to_string(pos.x())) + ";" +
+                QString::fromStdString(std::to_string(pos.y())) + "\n";
+    }
+    m_ui->plainTextEdit->setPlainText(res);
 }
 
 void BeaconEditor::setText(const QString &text) {

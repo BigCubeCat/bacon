@@ -56,3 +56,6 @@ Scene::~Scene() {
     delete m_esp;
     delete m_layout;
 }
+
+void Scene::beaconChanged() {
+}
