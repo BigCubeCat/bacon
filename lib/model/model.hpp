@@ -54,7 +54,7 @@ class Model : public QObject {
     QString m_url;
     float m_freq;
 
-    bool m_running = true;
+    bool m_running = false;
 
     mqtt_connector::MqttClient* m_connector;
 

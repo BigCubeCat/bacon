@@ -6,5 +6,6 @@
         <file>assets/save.png</file>
         <file>assets/open.png</file>
         <file>assets/stop.png</file>
+        <file>assets/ok.png</file>
     </qresource>
 </RCC>

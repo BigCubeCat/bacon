@@ -1,12 +1,12 @@
 #include "pathcontroller.hpp"
 
-#include <QPushButton>
 #include <qwidget.h>
+#include <QPushButton>
 #include "model.hpp"
 #include "ui_pathcontroller.h"
 #include "utils.hpp"
 
-PathController::PathController(Model *model, QWidget *parent)
+PathController::PathController(Model* model, QWidget* parent)
     : QWidget(parent),
       m_ui(new Ui::PathController),
       m_model(model),
@@ -17,6 +17,43 @@ PathController::PathController(Model *model, QWidget *parent)
     m_list->setHeaderData(2, Qt::Horizontal, "Time");
     m_ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_ui->tableView->setModel(m_list);
+
+    m_ui->resetBtn->setIcon(QIcon(":/assets/assets/stop.png"));
+    m_ui->startBtn->setIcon(QIcon(":/assets/assets/play.png"));
+    m_ui->stopBtn->setIcon(QIcon(":/assets/assets/pause.png"));
+    m_ui->acceptUrlBtn->setIcon(QIcon(":/assets/assets/ok.png"));
+    m_ui->freqBtn->setIcon(QIcon(":/assets/assets/ok.png"));
+    m_ui->freqBtn->setText("");
+    m_ui->acceptUrlBtn->setText("");
+    m_ui->resetBtn->setText("");
+    m_ui->startBtn->setText("");
+    m_ui->stopBtn->setText("");
+    m_ui->resetBtn->setIconSize(QSize(32, 32));
+    m_ui->startBtn->setIconSize(QSize(32, 32));
+    m_ui->stopBtn->setIconSize(QSize(32, 32));
+    m_ui->acceptUrlBtn->setIconSize(QSize(24, 24));
+    m_ui->freqBtn->setIconSize(QSize(24, 24));
+    m_ui->freqBtn->setFixedSize(QSize(24, 24));
+    m_ui->acceptUrlBtn->setFixedSize(QSize(24, 24));
+    m_ui->resetBtn->setToolTip("reset");
+    m_ui->stopBtn->setToolTip("stop");
+    m_ui->startBtn->setToolTip("start");
+    m_ui->resetBtn->setFlat(true);
+    m_ui->stopBtn->setFlat(true);
+    m_ui->startBtn->setFlat(true);
+    const QString style =
+        "QPushButton {"
+        "  border: none;"             // убираем рамку
+        "  background: transparent;"  // убираем фон
+        "}"
+        "QPushButton:hover {"
+        "  background: rgba(0,0,0,0.1);"  // опционально: легкий эффект при наведении
+        "}";
+    m_ui->resetBtn->setStyleSheet(style);
+    m_ui->startBtn->setStyleSheet(style);
+    m_ui->stopBtn->setStyleSheet(style);
+    m_ui->freqBtn->setStyleSheet(style);
+    m_ui->acceptUrlBtn->setStyleSheet(style);
 
     connect(m_ui->acceptUrlBtn, &QPushButton::clicked, this,
             &PathController::onUrlAccepted);
@@ -33,10 +70,10 @@ PathController::~PathController() {
     delete m_ui;
 }
 
-void PathController::setPath(const QList<QPointF> &path) {
+void PathController::setPath(const QList<QPointF>& path) {
     m_list->setRowCount(path.size());
     for (int row = 0; row < path.size(); ++row) {
-        const QPointF &p = path[row];
+        const QPointF& p = path[row];
         m_list->setItem(row, 0, new QStandardItem(QString::number(p.x())));
         m_list->setItem(row, 1, new QStandardItem(QString::number(p.y())));
     }
@@ -53,11 +90,12 @@ void PathController::resetPath() {
     emit pathReseted();
 }
 
-void PathController::addPathPoint(const QPointF &pnt) {
+void PathController::addPathPoint(const QPointF& pnt) {
     m_list->insertRow(0);
     m_list->setItem(0, 0, new QStandardItem(QString::number(pnt.x())));
     m_list->setItem(0, 1, new QStandardItem(QString::number(pnt.y())));
-    m_list->setItem(0, 2, new QStandardItem(QString::fromStdString(currentTime())));
+    m_list->setItem(0, 2,
+                    new QStandardItem(QString::fromStdString(currentTime())));
 }
 
 void PathController::onUrlAccepted() {

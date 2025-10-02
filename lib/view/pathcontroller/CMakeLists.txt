@@ -1,9 +1,10 @@
-qt_add_library(pathcontroller STATIC
+qt_add_library(pathcontroller SHARED
         pathcontroller.cpp
         pathcontroller.hpp
         pathcontroller.ui
         utils.hpp
         utils.cpp
+        ../../../resources.qrc
 )
 
 target_link_libraries(pathcontroller PUBLIC

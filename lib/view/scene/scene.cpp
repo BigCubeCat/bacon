@@ -66,6 +66,7 @@ void Scene::setupBasicScene() {
     m_pathItems = new QGraphicsPathItem();
     m_scene->addItem(m_pathItems);
     m_pathItems->setPen(QPen(kPathColor[0], 2));
+    m_view->centerOn(m_esp);
 }
 
 void Scene::clearScene() {
@@ -95,5 +96,6 @@ void Scene::espChanged() {
     }
     m_scene->addItem(new PointItem(pos.x(), pos.y(), kPathColor[1], 2));
     m_pathItems->setPath(p);
+    m_view->centerOn(m_esp);
     update();
 }
