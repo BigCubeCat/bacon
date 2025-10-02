@@ -9,6 +9,7 @@
 #include "espitem.hpp"
 #include "model.hpp"
 
+class PointItem;
 class Scene : public QWidget {
     Q_OBJECT
 
@@ -28,10 +29,7 @@ class Scene : public QWidget {
 
     QVBoxLayout* m_layout;
 
-    QPropertyAnimation* m_animVert;
-    QPropertyAnimation* m_animHoriz;
-
-    void centerEsp();
+    QList<PointItem*> m_items;
 
     void setupBasicScene();
 
@@ -45,6 +43,8 @@ class Scene : public QWidget {
     void beaconChanged();
 
     void espChanged();
+
+    void onPathChanged();
 };
 
 #endif  //APP_SCENE_HPP
