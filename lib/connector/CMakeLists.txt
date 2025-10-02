@@ -85,6 +85,7 @@ set(CONNECTOR_SOURCES
     src/mqtt_connector/mqtt_client.cpp
     src/mqtt_connector/message_handler.cpp
     src/mqtt_connector/connection_manager.cpp
+    src/navigator/navigator.cpp
 )
 
 set(CONNECTOR_HEADERS
