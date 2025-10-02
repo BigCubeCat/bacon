@@ -13,7 +13,7 @@ MainWindow::MainWindow(Model *model, QWidget *parent)
 
     m_ui->tabWidget->removeTab(0);
     m_ui->tabWidget->removeTab(0);
-    // m_ui->area->addTab(m_scene, "Scene");
+    m_ui->scrollArea->setWidget(m_scene);
 }
 
 MainWindow::~MainWindow() {

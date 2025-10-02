@@ -15,17 +15,14 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>List of Baecons</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignmentFlag::AlignCenter</set>
-     </property>
-    </widget>
+    <widget class="QPlainTextEdit" name="plainTextEdit"/>
    </item>
    <item>
-    <widget class="QListView" name="listView"/>
+    <widget class="QPushButton" name="acceptButton">
+     <property name="text">
+      <string>accept</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

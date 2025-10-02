@@ -7,8 +7,8 @@ Beacons Model::beacons() const {
     return m_beacons;
 }
 
-Beacon *Model::beacon(int index) {
-    return m_beacons.beacon(index);
+Beacon *Model::beacon(int index) const {
+    return m_beacons.at(index);
 }
 
 void Model::setPosEsp(const QPointF &pos) {
@@ -29,4 +29,14 @@ void Model::addPointToPath(const QPointF &pos) {
 
 QList<QPointF> Model::path() const {
     return m_path;
+}
+
+void Model::updateBeacon(int index, Beacon *beacon) {
+    auto *old = m_beacons[index];
+    m_beacons[index] = beacon;
+    delete old;
+}
+
+void Model::addBeacon(Beacon *beacon) {
+    m_beacons.append(beacon);
 }

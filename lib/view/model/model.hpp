@@ -1,16 +1,20 @@
 #ifndef APP_MODEL_HPP
 #define APP_MODEL_HPP
-#include "beacons.hpp"
+#include <QList>
+
+#include "beacon.hpp"
 #include "espobject.hpp"
 
+
+using Beacons = QList<Beacon*>;
 
 class Model {
 public:
     explicit Model();
 
-    Beacons beacons() const;
+    [[nodiscard]] Beacons beacons() const;
 
-    Beacon *beacon(int index);
+    [[nodiscard]] Beacon *beacon(int index) const;
 
     void setPosEsp(const QPointF &pos);
 
@@ -20,10 +24,18 @@ public:
 
     void addPointToPath(const QPointF &pos);
 
-    QList<QPointF> path() const;
+    [[nodiscard]] QList<QPointF> path() const;
+
+    void updateBeacon(int index, Beacon *beacon);
+
+    void addBeacon(Beacon *beacon);
 
 signals:
     void dataChanged();
+    void pathChanged();
+    void pathAdded();
+    void oneBeaconChanged(int index);
+    void beaconsChanged();
 
 private:
     Beacons m_beacons;

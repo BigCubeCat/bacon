@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "beacon.hpp"
+
 
 QT_BEGIN_NAMESPACE
 
@@ -23,6 +25,12 @@ public:
 
 private:
     Ui::BeaconEditor *m_ui;
+
+public slots:
+    void setText(const QString &text);
+
+signals:
+    void accepted(const QList<Beacon*> &beacons);
 };
 
 
