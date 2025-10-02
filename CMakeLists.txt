@@ -13,10 +13,13 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 
+find_package(Eigen3 REQUIRED)
+
 add_executable(app main.cpp)
 target_link_libraries(app
         Qt::Core
         Qt::Gui
         Qt::Widgets
+        Eigen3::Eigen
 )
 
