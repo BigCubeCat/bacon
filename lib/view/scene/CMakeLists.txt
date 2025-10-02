@@ -6,6 +6,7 @@ qt_add_library(scene STATIC
         espitem.hpp
         scene.cpp
         scene.hpp
+        pointitem.hpp
 )
 
 target_link_libraries(scene PUBLIC
