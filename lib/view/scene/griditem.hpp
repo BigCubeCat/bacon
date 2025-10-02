@@ -13,11 +13,12 @@ public:
 
     QRectF boundingRect() const override {
         // Ограничим сетку разумным квадратом
-        return QRectF(-5000, -5000, 10000, 10000);
+        return QRectF(-COUNT_CELLS * CELL_SIZE, -COUNT_CELLS * CELL_SIZE, COUNT_CELLS * 2 * CELL_SIZE,
+                      COUNT_CELLS * 2 * CELL_SIZE);
     }
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *) override {
-        painter->setPen(QPen(Qt::lightGray, 0));
+        painter->setPen(QPen(kGridColor, 0));
         const QRectF rect = boundingRect();
 
         for (qreal x = rect.left(); x <= rect.right(); x += m_spacing)

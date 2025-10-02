@@ -2,10 +2,15 @@
 #define APP_CONST_HPP
 #include <qcolor.h>
 
+constexpr float CELL_SIZE = 30.0f;
+constexpr float COUNT_CELLS = 100;
+constexpr int MAX_ZOOM = 12;
+
+
 const QColor kPrimaryColor[3] = {
-    QColor("#006957"),
-    QColor("#1E796A"),
-    QColor("#00A287")
+    QColor("#3F51B5"),
+    QColor("#6573C3"),
+    QColor("#3f51B5")
 };
 
 const QColor kSecondaryColor[3] = {
@@ -14,5 +19,7 @@ const QColor kSecondaryColor[3] = {
     QColor("#5ED0BD")
 };
 
+const QColor kBackgroundColor = QColor("#f0f0f0");
+const QColor kGridColor = QColor("#dadaea");
 
 #endif //APP_CONST_HPP

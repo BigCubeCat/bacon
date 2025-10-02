@@ -7,13 +7,10 @@
 #include <QVBoxLayout>
 #include <cmath>
 
+#include "const.hpp"
 #include "beaconitem.hpp"
 #include "espitem.hpp"
 #include "griditem.hpp"
-
-constexpr float CELL_SIZE = 30.0f;
-constexpr float COUNT_CELLS = 100;
-constexpr int MAX_ZOOM = 12;
 
 Scene::Scene(Model* model, QWidget* parent)
     : QWidget(parent),
@@ -27,11 +24,13 @@ Scene::Scene(Model* model, QWidget* parent)
     setLayout(m_layout);
 
     m_view->setDragMode(QGraphicsView::ScrollHandDrag);
+    m_view->setAutoFillBackground(true);
 
     m_view->setRenderHint(QPainter::Antialiasing);
     m_view->setSceneRect(
-        -COUNT_CELLS / 2 * CELL_SIZE, -COUNT_CELLS / 2 * CELL_SIZE,
-        COUNT_CELLS * 2 * CELL_SIZE, COUNT_CELLS * 2 * CELL_SIZE);
+        -COUNT_CELLS * CELL_SIZE, -COUNT_CELLS * CELL_SIZE,
+        COUNT_CELLS * CELL_SIZE * 2, COUNT_CELLS * CELL_SIZE * 2);
+    m_view->setBackgroundBrush(QBrush(kBackgroundColor));
 
     setupBasicScene();
 }

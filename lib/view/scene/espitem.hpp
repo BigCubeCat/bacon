@@ -10,19 +10,22 @@
 
 class EspItem : public QGraphicsEllipseItem {
 public:
-    explicit EspItem(qreal radius = 8.0, qreal wave = 5, int countWaves = 3)
+    explicit EspItem(qreal radius = 8.0, qreal wave = 4, int countWaves = 3)
         : QGraphicsEllipseItem(-radius, -radius, radius * 2, radius * 2), m_radius(radius * wave) {
-        setBrush(kPrimaryColor[1]);
+        setBrush(kPrimaryColor[0]);
+        setPen(Qt::NoPen);
         setZValue(10);
 
+        const auto msec = 100;
         for (int i = 0; i < countWaves; i++) {
             auto *waveItem = new WaveItem(
-                radius * wave,
-                kPrimaryColor[1],
+                radius,
+                m_radius,
+                kPrimaryColor[0],
                 kPrimaryColor[2],
                 this,
-                30,
-                i * 40
+                msec,
+                m_radius * i * msec / countWaves
             );
             waveItem->setZValue(9);
             m_waves.push_back(waveItem);
