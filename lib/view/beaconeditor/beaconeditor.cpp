@@ -22,8 +22,7 @@ BeaconEditor::BeaconEditor(Model *m, QWidget *parent) : QWidget(parent), m_ui(ne
 
     connect(m_ui->plainTextEdit, &QPlainTextEdit::textChanged, this, &BeaconEditor::updateText);
     connect(m_ui->acceptButton, &QPushButton::clicked, this, &BeaconEditor::acceptedSlot);
-    connect(m_ui->openButton, &QPushButton::clicked, this, &BeaconEditor::openFile);
-    connect(m_ui->saveButton, &QPushButton::clicked, this, &BeaconEditor::saveIntoFile);
+    acceptedSlot();
 }
 
 BeaconEditor::~BeaconEditor() {
@@ -142,6 +141,7 @@ void BeaconEditor::openFile() {
     file.close();
 
     m_ui->plainTextEdit->setPlainText(fileContent);
+    acceptedSlot();
 }
 
 void BeaconEditor::saveIntoFile() {

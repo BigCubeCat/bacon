@@ -63,6 +63,7 @@ class Model : public QObject {
     void pointAdded(const QPointF& point);
     void onChangeFreq(float freq);
     void onUrlChanged(const QString& url);
+    void setPath(const QList<QPointF>& path);
 
     void onStopped();
     void onStarted();

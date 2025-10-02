@@ -31,6 +31,9 @@ void Model::clearPath() {
 }
 
 void Model::addPointToPath(const QPointF &pos) {
+    if (!m_running) {
+        return;
+    }
     m_path.append(pos);
     m_esp.setPos(pos);
     emit dataChanged();
@@ -84,6 +87,11 @@ void Model::onChangeFreq(float freq) {
 void Model::onUrlChanged(const QString &url) {
     m_url = url;
     emit urlChanged(m_url);
+}
+
+void Model::setPath(const QList<QPointF>& path) {
+    m_path = path;
+    emit pathChanged();
 }
 
 void Model::onStopped() {
