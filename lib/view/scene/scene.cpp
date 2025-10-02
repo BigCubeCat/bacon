@@ -7,13 +7,13 @@
 #include <QVBoxLayout>
 #include <cmath>
 
-#include "const.hpp"
 #include "beaconitem.hpp"
+#include "const.hpp"
 #include "espitem.hpp"
 #include "griditem.hpp"
 #include "pointitem.hpp"
 
-Scene::Scene(Model *model, QWidget *parent)
+Scene::Scene(Model* model, QWidget* parent)
     : QWidget(parent),
       m_model(model),
       m_scene(new QGraphicsScene(this)),
@@ -28,11 +28,10 @@ Scene::Scene(Model *model, QWidget *parent)
     m_view->setAutoFillBackground(true);
 
     m_view->setRenderHint(QPainter::Antialiasing);
-    m_view->setSceneRect(
-        -COUNT_CELLS * CELL_SIZE, -COUNT_CELLS * CELL_SIZE,
-        COUNT_CELLS * CELL_SIZE * 2, COUNT_CELLS * CELL_SIZE * 2);
+    m_view->setSceneRect(-COUNT_CELLS * CELL_SIZE, -COUNT_CELLS * CELL_SIZE,
+                         COUNT_CELLS * CELL_SIZE * 2,
+                         COUNT_CELLS * CELL_SIZE * 2);
     m_view->setBackgroundBrush(QBrush(kBackgroundColor));
-
 
     setupBasicScene();
 }
@@ -43,7 +42,7 @@ Scene::~Scene() {
     delete m_layout;
 }
 
-void Scene::keyPressEvent(QKeyEvent *event) {
+void Scene::keyPressEvent(QKeyEvent* event) {
     QWidget::keyPressEvent(event);
     if (event->key() == Qt::Key_Plus) {
         if (m_zoomCounter < MAX_ZOOM) {
@@ -60,7 +59,7 @@ void Scene::keyPressEvent(QKeyEvent *event) {
 
 void Scene::setupBasicScene() {
     clearScene();
-    m_scene->addItem(new GridItem(CELL_SIZE)); // сетка
+    m_scene->addItem(new GridItem(CELL_SIZE));  // сетка
     m_esp = new EspItem("CONNECTED", 10);
     m_scene->addItem(m_esp);
     m_esp->setPos(0, 0);
@@ -76,7 +75,7 @@ void Scene::clearScene() {
 void Scene::beaconChanged() {
     setupBasicScene();
     const auto beacons = m_model->beacons();
-    for (const auto &beacon: beacons) {
+    for (const auto& beacon : beacons) {
         const auto pos = beacon.pos();
         m_scene->addItem(new BeaconItem(beacon.name(), pos.x(), pos.y()));
     }
@@ -89,14 +88,16 @@ void Scene::espChanged() {
     m_esp->setPos(pos.x() * CELL_SIZE, -pos.y() * CELL_SIZE);
     m_esp->setStatus(m_model->status());
     const auto path = m_model->path();
-    auto p = m_pathItems->path();
+    QPainterPath pp;
     if (path.isEmpty()) {
-        p.moveTo(QPointF(pos.x() * CELL_SIZE, -pos.y() * CELL_SIZE));
+        pp.moveTo(QPointF(pos.x() * CELL_SIZE, -pos.y() * CELL_SIZE));
     } else {
-        p.lineTo(QPointF(pos.x() * CELL_SIZE, -pos.y() * CELL_SIZE));
+        pp.moveTo(QPointF(path[0].x() * CELL_SIZE, -path[0].y() * CELL_SIZE));
+        for (int i = 1; i < path.size(); i++) {
+            pp.lineTo(QPointF(path[i].x() * CELL_SIZE, -path[i].y() * CELL_SIZE));
+        }
     }
-    m_scene->addItem(new PointItem(pos.x(), pos.y(), kPathColor[1], 2));
-    m_pathItems->setPath(p);
+    m_pathItems->setPath(pp);
 
     update();
 }
