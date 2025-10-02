@@ -1,6 +1,10 @@
 #include "mainwindow.hpp"
+#include <qpoint.h>
+#include <qtimer.h>
 
 #include "ui_mainwindow.h"
+
+#include <QObject>
 
 MainWindow::MainWindow(Model* model, QWidget* parent)
     : QMainWindow(parent),
@@ -24,10 +28,9 @@ MainWindow::MainWindow(Model* model, QWidget* parent)
     connect(m_model, &Model::signalBeaconsChanged, m_scene,
             &Scene::beaconChanged);
 
-    QList<QPointF> points = {QPointF(1.5, 2.3), QPointF(3.7, -1.2),
-                             QPointF(0.0, 4.4)};
-
-    m_pathController->setPath(points);
+    connect(m_model, &Model::dataChanged, m_scene, &Scene::espChanged);
+    connect(m_model, &Model::pointAddedSignal, m_pathController,
+            &PathController::addPathPoint);
 }
 
 MainWindow::~MainWindow() {

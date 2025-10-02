@@ -35,6 +35,7 @@ class Model : public QObject {
 
    signals:
     void dataChanged();
+    void pointAddedSignal(const QPointF& pnt);
 
     void pathChanged();
 

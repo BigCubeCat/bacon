@@ -2,7 +2,8 @@
 
 #include <iostream>
 
-Model::Model(mqtt_connector::MqttClient* connector) : m_esp(QString("esp"), QPointF(10.0, 10.0)), m_connector(connector) {}
+Model::Model(mqtt_connector::MqttClient* connector)
+    : m_esp(QString("esp"), QPointF(10.0, 10.0)), m_connector(connector) {}
 
 QList<Beacon> Model::beacons() const {
     return m_beacons;
@@ -30,6 +31,9 @@ void Model::clearPath() {
 
 void Model::addPointToPath(const QPointF& pos) {
     m_path.append(pos);
+    m_esp.setPos(pos);
+    emit dataChanged();
+    emit pointAddedSignal(pos);
 }
 
 QList<QPointF> Model::path() const {
