@@ -82,9 +82,9 @@ include_directories(
 )
 
 set(CONNECTOR_SOURCES
-    src/mqtt_client.cpp
-    src/message_handler.cpp
-    src/connection_manager.cpp
+    src/mqtt_connector/mqtt_client.cpp
+    src/mqtt_connector/message_handler.cpp
+    src/mqtt_connector/connection_manager.cpp
 )
 
 set(CONNECTOR_HEADERS
@@ -93,6 +93,7 @@ set(CONNECTOR_HEADERS
     include/mqtt_connector/connection_manager.h
     include/mqtt_connector/types.h
     include/message_objects/BLE.h
+    include/navigator/navigator.h
 )
 
 add_library(connector STATIC ${CONNECTOR_SOURCES} ${CONNECTOR_HEADERS})

@@ -1,10 +1,11 @@
 #pragma once
 
-#include "types.h"
 #include <memory>
 #include <atomic>
 #include <thread>
 #include <mutex>
+
+#include "types.h"
 
 // Forward declarations Paho MQTT
 namespace mqtt {

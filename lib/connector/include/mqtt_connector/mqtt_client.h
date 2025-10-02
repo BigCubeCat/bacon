@@ -1,11 +1,12 @@
 #pragma once
 
-#include "types.h"
-#include "message_handler.h"
-#include "connection_manager.h"
 #include <memory>
 #include <vector>
 #include <mutex>
+
+#include "types.h"
+#include "message_handler.h"
+#include "connection_manager.h"
 
 namespace mqtt_connector {
 

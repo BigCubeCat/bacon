@@ -1,4 +1,5 @@
 #include "mqtt_connector/connection_manager.h"
+
 #include <mqtt/async_client.h>
 #include <mqtt/callback.h>
 #include <mqtt/ssl_options.h>

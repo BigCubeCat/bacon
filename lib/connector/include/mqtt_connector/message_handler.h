@@ -1,9 +1,10 @@
 #pragma once
 
-#include "types.h"
 #include <unordered_map>
 #include <memory>
 #include <mutex>
+
+#include "types.h"
 
 namespace mqtt_connector {
 
