@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
     window.show();
 
     QObject::connect(conn.get(), &mqtt_connector::MqttClient::addPathPoint, model.get(), &Model::addPointToPath);
+    QObject::connect(conn.get(), &mqtt_connector::MqttClient::setConnectStatus, model.get(), &Model::onStatusChanged);
     QObject::connect(model.get(), &Model::urlChanged, conn.get(), &mqtt_connector::MqttClient::initOnChange);
     QObject::connect(model.get(), &Model::freqChanged, conn.get(), &mqtt_connector::MqttClient::setFreqOnChange);
     QObject::connect(model.get(), &Model::signalBeaconsChanged, conn.get(), &mqtt_connector::MqttClient::setBeacons);
