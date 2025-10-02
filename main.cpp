@@ -1,10 +1,15 @@
 #include <QApplication>
-#include <QPushButton>
+
+#include "mainwindow.hpp"
+#include "model.hpp"
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
-    QPushButton button("Hello world!", nullptr);
-    button.resize(200, 100);
-    button.show();
+    std::shared_ptr<Model> model = std::make_shared<Model>();
+    MainWindow window(model.get());
+
+    window.resize(1200, 800);
+    window.show();
+
     return QApplication::exec();
 }
