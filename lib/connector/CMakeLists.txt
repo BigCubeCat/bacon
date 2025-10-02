@@ -1,4 +1,5 @@
 # cmake_minimum_required(VERSION 3.16)
+
 project(connector VERSION 1.0.0)
 
 # set(CMAKE_CXX_STANDARD 17)
@@ -28,6 +29,7 @@ set(CONNECTOR_HEADERS
     include/mqtt_connector/types.h
     include/message_objects/BLE.h
     include/navigator/navigator.h
+    include/json.hpp
 )
 
 qt_add_library(

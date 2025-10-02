@@ -3,19 +3,14 @@
 #include "types.h"
 #include "message_handler.h"
 #include "connection_manager.h"
+#include "message_objects/BLE.h"
+
+#include <mqtt/callback.h>
 #include <memory>
 #include <vector>
 #include <mutex>
 
 #include <QObject>
-
-#include <mqtt/callback.h>
-
-class callback : public virtual mqtt::callback {
-    void message_arrived(mqtt::const_message_ptr msg) override {
-        std::cout << "Message received: " << msg->get_payload_str() << std::endl;
-    }
-};
 
 namespace mqtt_connector {
 
@@ -123,6 +118,18 @@ public:
      */
     std::string getStatus() const;
 
+    const std::vector<message_objects::BLEBeacon>& getBeacons() const { return m_beacons; }
+
+    void setBLEBeaconState(const std::string& key, const std::vector<message_objects::BLEBeaconState>& states);
+    void addBLEBeaconState(const std::string& key, const message_objects::BLEBeaconState& state);
+    
+    void clearBLEBeaconStates() {
+        std::lock_guard<std::mutex> lock(m_data_mutex_);
+        m_data.clear();
+    }
+
+    bool BLEBeaconContains(const std::string& name);
+
     Q_SIGNALS:
     void addPathPoint(const QPointF &pos);
 
@@ -152,6 +159,11 @@ private:
     void restoreSubscriptions();
 
     float m_freq = 1.0f;
+
+    std::map<std::string, std::vector<message_objects::BLEBeaconState>> m_data;
+    mutable std::mutex m_data_mutex_;
+
+    std::vector<message_objects::BLEBeacon> m_beacons;
 };
 
 } // namespace mqtt_connector

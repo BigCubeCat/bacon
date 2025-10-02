@@ -23,6 +23,8 @@ MainWindow::MainWindow(Model* model, QWidget* parent)
             &BeaconEditor::updateBeacons);
     connect(m_model, &Model::signalBeaconsChanged, m_scene,
             &Scene::beaconChanged);
+    connect(m_pathController, &PathController::urlChanged, 
+            m_model, &Model::onUrlChanged);
 
     QList<QPointF> points = {QPointF(1.5, 2.3), QPointF(3.7, -1.2),
                              QPointF(0.0, 4.4)};

@@ -6,6 +6,7 @@
 #include <mutex>
 
 #include "types.h"
+#include "mqtt_client.h"
 
 // Forward declarations Paho MQTT
 namespace mqtt {
@@ -90,6 +91,8 @@ public:
      */
     void handleError(const std::string& error);
 
+    void setMqttClient(mqtt_connector::MqttClient* mgr) { mgr_ = mgr; } // HardCode
+
 private:
     std::unique_ptr<mqtt::async_client> client_;
     std::unique_ptr<mqtt::callback> callback_;
@@ -106,6 +109,9 @@ private:
     
     mutable std::mutex state_mutex_;
     std::string last_error_;
+
+    mqtt::callback* cb_; // HardCode
+    mqtt_connector::MqttClient* mgr_; // HardCode
 
     /**
      * @brief Поток автоматического переподключения
