@@ -6,7 +6,7 @@
 
 #include <QObject>
 
-MainWindow::MainWindow(Model* model, QWidget* parent)
+MainWindow::MainWindow(Model *model, QWidget *parent)
     : QMainWindow(parent),
       m_ui(new Ui::MainWindow),
       m_model(model),
@@ -31,6 +31,9 @@ MainWindow::MainWindow(Model* model, QWidget* parent)
     connect(m_model, &Model::dataChanged, m_scene, &Scene::espChanged);
     connect(m_model, &Model::pointAddedSignal, m_pathController,
             &PathController::addPathPoint);
+
+    connect(m_ui->actionOpen_beacon, &QAction::triggered, m_beaconEditor, &BeaconEditor::openFile);
+    connect(m_ui->actionSave_beacon, &QAction::triggered, m_beaconEditor, &BeaconEditor::saveIntoFile);
 }
 
 MainWindow::~MainWindow() {

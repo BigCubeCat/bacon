@@ -31,6 +31,9 @@ void Model::clearPath() {
 }
 
 void Model::addPointToPath(const QPointF &pos) {
+    if (!m_running) {
+        return;
+    }
     m_path.append(pos);
     m_esp.setPos(pos);
     emit dataChanged();
