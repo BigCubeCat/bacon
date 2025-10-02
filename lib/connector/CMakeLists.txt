@@ -92,6 +92,7 @@ set(CONNECTOR_HEADERS
     include/mqtt_connector/message_handler.h
     include/mqtt_connector/connection_manager.h
     include/mqtt_connector/types.h
+    include/message_objects/BLE.h
 )
 
 add_library(connector STATIC ${CONNECTOR_SOURCES} ${CONNECTOR_HEADERS})
