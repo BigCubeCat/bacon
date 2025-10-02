@@ -6,6 +6,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <QPointF>
+
 namespace mqtt_connector {
 
 MqttClient::MqttClient() 
@@ -295,17 +297,17 @@ void MqttClient::setFreqOnChange(float freq) {
     m_freq = freq;
 }
 
-// void MqttClient::setBeacons(const QList<std::pair<QString, QPointF>> &newBeacons) {
-//     std::lock_guard<std::mutex> lock(m_beacons_mutex_);
-//     m_beacons.clear();
-//     for (const auto& pair : newBeacons) {
-//         message_objects::BLEBeacon beacon;
-//         beacon.name_ = pair.first.toStdString();
-//         beacon.x_ = pair.second.x();
-//         beacon.y_ = pair.second.y();
-//         m_beacons.push_back(beacon);
-//     }
-// }
+void MqttClient::setBeacons(const QList<QPair<QString, QPointF>> &newBeacons) {
+    std::lock_guard<std::mutex> lock(m_beacons_mutex_);
+    m_beacons.clear();
+    for (const auto& pair : newBeacons) {
+        message_objects::BLEBeacon beacon;
+        beacon.name_ = pair.first.toStdString();
+        beacon.x_ = pair.second.x();
+        beacon.y_ = pair.second.y();
+        m_beacons.push_back(beacon);
+    }
+}
 
 void MqttClient::onMessageReceived(const Message& message) {
     message_handler_->handleMessage(message);

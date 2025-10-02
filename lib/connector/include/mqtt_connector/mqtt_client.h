@@ -12,6 +12,9 @@
 #include <mutex>
 
 #include <QObject>
+#include <QPointF>
+#include <QPair>
+#include <QList>
 
 namespace mqtt_connector {
 
@@ -135,7 +138,7 @@ public:
 public slots:
     void initOnChange(const QString &url);
     void setFreqOnChange(float freq);
-    // void setBeacons(const QList<std::pair<QString, QPointF>> &newBeacons);
+    void setBeacons(const QList<QPair<QString, QPointF>> &newBeacons);
 
 private:
     std::unique_ptr<ConnectionManager> connection_manager_;
