@@ -87,7 +87,7 @@ void Scene::espChanged() {
     const auto eo = m_model->esp();
     const auto pos = eo.pos();
     m_esp->setPos(pos.x() * CELL_SIZE, -pos.y() * CELL_SIZE);
-    m_esp->setStatus("CONNECTED");
+    m_esp->setStatus(m_model->status());
     const auto path = m_model->path();
     auto p = m_pathItems->path();
     if (path.isEmpty()) {

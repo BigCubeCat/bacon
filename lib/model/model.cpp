@@ -62,6 +62,10 @@ void Model::addBeacon(const Beacon &beacon) {
     emit signalBeaconsChanged(newBeacons);
 }
 
+QString Model::status() const {
+    return m_status;
+}
+
 void Model::beaconChanged(const QList<Beacon> &beacons) {
     m_beacons = beacons;
     QList<QPair<QString, QPointF> > newBeacons;
@@ -102,4 +106,8 @@ void Model::onStopped() {
 void Model::onStarted() {
     std::cout << "started\n";
     m_running = true;
+}
+
+void Model::onStatusChanged(const QString& status) {
+    m_status = status;
 }
