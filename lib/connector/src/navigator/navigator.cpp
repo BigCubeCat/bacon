@@ -1,4 +1,4 @@
-#include "Navigator.h"
+#include "navigator/navigator.h"
 #include <cmath>
 #include <stdexcept>
 #include <algorithm>

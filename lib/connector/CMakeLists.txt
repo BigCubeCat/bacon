@@ -86,6 +86,7 @@ set(CONNECTOR_SOURCES
     src/mqtt_connector/message_handler.cpp
     src/mqtt_connector/connection_manager.cpp
     src/navigator/navigator.cpp
+    src/config/config.cpp
 )
 
 set(CONNECTOR_HEADERS
@@ -95,6 +96,7 @@ set(CONNECTOR_HEADERS
     include/mqtt_connector/types.h
     include/message_objects/BLE.h
     include/navigator/navigator.h
+    include/config/config.h
 )
 
 add_library(connector STATIC ${CONNECTOR_SOURCES} ${CONNECTOR_HEADERS})
