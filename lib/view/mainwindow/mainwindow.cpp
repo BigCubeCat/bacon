@@ -1,7 +1,5 @@
 #include "mainwindow.hpp"
 
-#include <iostream>
-
 #include "ui_mainwindow.h"
 
 
@@ -16,12 +14,11 @@ MainWindow::MainWindow(Model *model, QWidget *parent)
     m_ui->tabWidget->removeTab(0);
     m_ui->tabWidget->removeTab(0);
     m_ui->tabWidget->addTab(m_beaconEditor, "Beacon Editor");
-    m_ui->scrollArea->setWidget(m_scene);
+    m_ui->verticalLayout->addWidget(m_scene);
 
     connect(m_beaconEditor, &BeaconEditor::accepted, m_model, &Model::beaconChanged);
     connect(m_model, &Model::signalBeaconsChanged, m_beaconEditor, &BeaconEditor::updateBeacons);
-
-    std::cout << m_model->beacons().size() << std::endl;
+    connect(m_model, &Model::signalBeaconsChanged, m_scene, &Scene::beaconChanged);
 }
 
 MainWindow::~MainWindow() {

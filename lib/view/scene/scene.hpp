@@ -16,6 +16,9 @@ public:
 
     ~Scene() override;
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+
 private:
     Model *m_model;
     QGraphicsScene *m_scene;
@@ -28,8 +31,11 @@ private:
 
     void clearScene();
 
+    int m_zoomCounter = 0;
+
 public slots:
     void beaconChanged();
+
     void espChanged();
 };
 

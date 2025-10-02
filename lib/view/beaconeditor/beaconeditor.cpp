@@ -1,7 +1,5 @@
 #include "beaconeditor.hpp"
 
-#include <iostream>
-
 #include "ui_beaconeditor.h"
 
 BeaconEditor::BeaconEditor(Model *m, QWidget *parent) : QWidget(parent), m_ui(new Ui::BeaconEditor), m_model(m) {
@@ -61,7 +59,6 @@ void BeaconEditor::parseBeacons(const QString &text) {
         } catch (const std::invalid_argument &e) {
             return std::nullopt;
         }
-        std::cout << x << " " << y << std::endl;
         std::pair<QString, QPointF> result;
         result.first = QString::fromStdString(name);
         result.second = QPointF(x, y);

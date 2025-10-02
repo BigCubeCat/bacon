@@ -15,8 +15,6 @@ public:
     {
         setPos(x, y);
         setBrush(QBrush(Qt::blue));
-        setFlag(QGraphicsItem::ItemIsMovable);
-        setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
         updateToolTip();
     }
 
