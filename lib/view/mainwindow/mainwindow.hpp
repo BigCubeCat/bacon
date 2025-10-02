@@ -5,12 +5,13 @@
 
 #include "beaconeditor.hpp"
 #include "model.hpp"
+#include "pathcontroller.hpp"
 #include "scene.hpp"
 
 QT_BEGIN_NAMESPACE
 
 namespace Ui {
-    class MainWindow;
+class MainWindow;
 }
 
 QT_END_NAMESPACE
@@ -18,18 +19,19 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
-    explicit MainWindow(Model *model, QWidget *parent = nullptr);
+   public:
+    explicit MainWindow(Model* model, QWidget* parent = nullptr);
 
     ~MainWindow() override;
 
-private:
-    Ui::MainWindow *m_ui;
+   private:
+    Ui::MainWindow* m_ui;
 
-    Model *m_model;
+    Model* m_model;
 
-    BeaconEditor *m_beaconEditor;
-    Scene *m_scene;
+    BeaconEditor* m_beaconEditor;
+    PathController* m_pathController;
+    Scene* m_scene;
 };
 
-#endif //APP_MAINWINDOW_HPP
+#endif  //APP_MAINWINDOW_HPP

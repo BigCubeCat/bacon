@@ -1,7 +1,6 @@
 qt_add_library(model STATIC
         abstractitem.hpp
         beacon.hpp
-        beacons.hpp
         espobject.hpp
         model.cpp
         model.hpp
