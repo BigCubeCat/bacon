@@ -13,7 +13,7 @@ find_package(Threads REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt6 COMPONENTS Widgets QUIET)
 
-# set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOMOC ON)
 
 set(CONNECTOR_SOURCES
     src/mqtt_connector/mqtt_client.cpp

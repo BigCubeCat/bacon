@@ -22,6 +22,8 @@ add_subdirectory(lib/model)
 add_subdirectory(lib/view)
 add_subdirectory(lib/connector)
 
+set_target_properties(connector PROPERTIES AUTOMOC ON)
+
 add_executable(app main.cpp)
 target_link_libraries(app
         Qt::Core
