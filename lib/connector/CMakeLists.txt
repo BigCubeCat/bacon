@@ -109,8 +109,6 @@ include_directories(
     ${PAHO_MQTT_INCLUDE_DIRS}
 )
 
-# add_library(connector STATIC ${CONNECTOR_SOURCES} ${CONNECTOR_HEADERS})
-
 target_link_libraries(connector
     PRIVATE
     ${PAHO_MQTT_LIBRARIES}

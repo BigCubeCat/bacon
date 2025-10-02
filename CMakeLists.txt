@@ -16,6 +16,9 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 
+find_package(Eigen3 REQUIRED)
+
+
 qt6_add_resources(RESOURCES resources.qrc)
 
 add_subdirectory(lib/model)
@@ -29,6 +32,7 @@ target_link_libraries(app
         Qt::Core
         Qt::Gui
         Qt::Widgets
+        Eigen3::Eigen
         mainwindow
         model
 )
