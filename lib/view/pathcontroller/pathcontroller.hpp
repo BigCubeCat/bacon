@@ -29,7 +29,7 @@ class PathController : public QWidget {
     QStandardItemModel* m_list;
 
    public slots:
-    void setPath(const QList<QPointF>& path);
+    void setPath();
     void resetPath();
     void addPathPoint(const QPointF& pnt);
     void onUrlAccepted();

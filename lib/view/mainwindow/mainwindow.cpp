@@ -45,6 +45,8 @@ MainWindow::MainWindow(Model* model, QWidget* parent)
     connect(m_ui->actionSave_Path, &QAction::triggered, this,
             &MainWindow::savePathFile);
 
+    connect(m_model, &Model::pathChanged, m_pathController, &PathController::setPath);
+
     m_beaconEditor->acceptedSlot();
 }
 
