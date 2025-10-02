@@ -1,19 +1,22 @@
 #include "pathcontroller.hpp"
 
+#include <QPushButton>
 #include <qwidget.h>
 #include "model.hpp"
 #include "ui_pathcontroller.h"
 #include "utils.hpp"
 
-PathController::PathController(Model* model, QWidget* parent)
+PathController::PathController(Model *model, QWidget *parent)
     : QWidget(parent),
       m_ui(new Ui::PathController),
       m_model(model),
-      m_list(new QStandardItemModel(0, 2, this)) {
+      m_list(new QStandardItemModel(0, 3, this)) {
     m_ui->setupUi(this);
     m_list->setHeaderData(0, Qt::Horizontal, "X");
     m_list->setHeaderData(1, Qt::Horizontal, "Y");
+    m_list->setHeaderData(2, Qt::Horizontal, "Time");
     m_ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    m_ui->tableView->setModel(m_list);
 
     connect(m_ui->acceptUrlBtn, &QPushButton::clicked, this,
             &PathController::onUrlAccepted);
@@ -30,16 +33,13 @@ PathController::~PathController() {
     delete m_ui;
 }
 
-void PathController::setPath(const QList<QPointF>& path) {
-
+void PathController::setPath(const QList<QPointF> &path) {
     m_list->setRowCount(path.size());
     for (int row = 0; row < path.size(); ++row) {
-        const QPointF& p = path[row];
+        const QPointF &p = path[row];
         m_list->setItem(row, 0, new QStandardItem(QString::number(p.x())));
         m_list->setItem(row, 1, new QStandardItem(QString::number(p.y())));
     }
-
-    m_ui->tableView->setModel(m_list);
 
     m_ui->tableView->horizontalHeader()->setSectionResizeMode(
         QHeaderView::Stretch);
@@ -53,11 +53,11 @@ void PathController::resetPath() {
     emit pathReseted();
 }
 
-void PathController::addPathPoint(const QPointF& pnt) {
-    const auto row = m_list->rowCount();
-    m_list->setRowCount(row + 1);
-    m_list->setItem(row, 0, new QStandardItem(QString::number(pnt.x())));
-    m_list->setItem(row, 1, new QStandardItem(QString::number(pnt.y())));
+void PathController::addPathPoint(const QPointF &pnt) {
+    m_list->insertRow(0);
+    m_list->setItem(0, 0, new QStandardItem(QString::number(pnt.x())));
+    m_list->setItem(0, 1, new QStandardItem(QString::number(pnt.y())));
+    m_list->setItem(0, 2, new QStandardItem(QString::fromStdString(currentTime())));
 }
 
 void PathController::onUrlAccepted() {

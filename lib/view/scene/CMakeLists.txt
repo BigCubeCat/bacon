@@ -1,9 +1,12 @@
 qt_add_library(scene STATIC
+        const.hpp
+        waveitem.hpp
         griditem.hpp
         beaconitem.hpp
         espitem.hpp
         scene.cpp
         scene.hpp
+        pointitem.hpp
 )
 
 target_link_libraries(scene PUBLIC

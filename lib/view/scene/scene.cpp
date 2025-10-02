@@ -7,15 +7,13 @@
 #include <QVBoxLayout>
 #include <cmath>
 
+#include "const.hpp"
 #include "beaconitem.hpp"
 #include "espitem.hpp"
 #include "griditem.hpp"
+#include "pointitem.hpp"
 
-constexpr float CELL_SIZE = 30.0f;
-constexpr float COUNT_CELLS = 100;
-constexpr int MAX_ZOOM = 12;
-
-Scene::Scene(Model* model, QWidget* parent)
+Scene::Scene(Model *model, QWidget *parent)
     : QWidget(parent),
       m_model(model),
       m_scene(new QGraphicsScene(this)),
@@ -27,11 +25,13 @@ Scene::Scene(Model* model, QWidget* parent)
     setLayout(m_layout);
 
     m_view->setDragMode(QGraphicsView::ScrollHandDrag);
+    m_view->setAutoFillBackground(true);
 
     m_view->setRenderHint(QPainter::Antialiasing);
     m_view->setSceneRect(
-        -COUNT_CELLS / 2 * CELL_SIZE, -COUNT_CELLS / 2 * CELL_SIZE,
-        COUNT_CELLS * 2 * CELL_SIZE, COUNT_CELLS * 2 * CELL_SIZE);
+        -COUNT_CELLS * CELL_SIZE, -COUNT_CELLS * CELL_SIZE,
+        COUNT_CELLS * CELL_SIZE * 2, COUNT_CELLS * CELL_SIZE * 2);
+    m_view->setBackgroundBrush(QBrush(kBackgroundColor));
 
     setupBasicScene();
 }
@@ -42,7 +42,7 @@ Scene::~Scene() {
     delete m_layout;
 }
 
-void Scene::keyPressEvent(QKeyEvent* event) {
+void Scene::keyPressEvent(QKeyEvent *event) {
     QWidget::keyPressEvent(event);
     if (event->key() == Qt::Key_Plus) {
         if (m_zoomCounter < MAX_ZOOM) {
@@ -59,13 +59,13 @@ void Scene::keyPressEvent(QKeyEvent* event) {
 
 void Scene::setupBasicScene() {
     clearScene();
-    m_scene->addItem(new GridItem(CELL_SIZE));  // сетка
+    m_scene->addItem(new GridItem(CELL_SIZE)); // сетка
     m_esp = new EspItem(10);
     m_scene->addItem(m_esp);
     m_esp->setPos(0, 0);
     m_pathItems = new QGraphicsPathItem();
     m_scene->addItem(m_pathItems);
-    m_pathItems->setPen(QPen(QColor(200, 32, 200), 2));
+    m_pathItems->setPen(QPen(kPathColor[0], 2));
 }
 
 void Scene::clearScene() {
@@ -75,10 +75,9 @@ void Scene::clearScene() {
 void Scene::beaconChanged() {
     setupBasicScene();
     const auto beacons = m_model->beacons();
-    for (const auto& beacon : beacons) {
+    for (const auto &beacon: beacons) {
         const auto pos = beacon.pos();
-        m_scene->addItem(new BeaconItem(beacon.name(), pos.x() * CELL_SIZE,
-                                        -pos.y() * CELL_SIZE));
+        m_scene->addItem(new BeaconItem(beacon.name(), pos.x(), pos.y()));
     }
     update();
 }
@@ -86,14 +85,15 @@ void Scene::beaconChanged() {
 void Scene::espChanged() {
     const auto eo = m_model->esp();
     const auto pos = eo.pos();
-    std::cout << "espCahnged: " << pos.x() << " " << pos.y() << "\n";
-    m_esp->setPos(pos.x() * CELL_SIZE, pos.y() * CELL_SIZE);
+    m_esp->setPos(pos.x() * CELL_SIZE, -pos.y() * CELL_SIZE);
     const auto path = m_model->path();
     auto p = m_pathItems->path();
-    if (path.isEmpty())
-        p.moveTo(QPointF(pos.x() * CELL_SIZE, pos.y() * CELL_SIZE));
-    else
-        p.lineTo(QPointF(pos.x() * CELL_SIZE, pos.y() * CELL_SIZE));
+    if (path.isEmpty()) {
+        p.moveTo(QPointF(pos.x() * CELL_SIZE, -pos.y() * CELL_SIZE));
+    } else {
+        p.lineTo(QPointF(pos.x() * CELL_SIZE, -pos.y() * CELL_SIZE));
+    }
+    m_scene->addItem(new PointItem(pos.x(), pos.y(), kPathColor[1], 2));
     m_pathItems->setPath(p);
     update();
 }
