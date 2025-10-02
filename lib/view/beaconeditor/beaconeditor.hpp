@@ -36,6 +36,8 @@ public slots:
     void updateText();
     void updateBeacons();
 
+    void acceptedSlot();
+
 signals:
     void accepted(const QList<Beacon> &beacons);
 };

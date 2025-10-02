@@ -1,5 +1,7 @@
 #include "model.hpp"
 
+#include <iostream>
+
 Model::Model() : m_esp(QString("esp"), QPointF(10.0, 10.0)) {
 }
 
@@ -9,6 +11,10 @@ Beacons Model::beacons() const {
 
 Beacon Model::beacon(int index) const {
     return m_beacons.at(index);
+}
+
+EspObject Model::esp() const {
+    return m_esp;
 }
 
 void Model::setPosEsp(const QPointF &pos) {

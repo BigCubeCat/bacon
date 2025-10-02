@@ -19,6 +19,8 @@ public:
 
     [[nodiscard]] Beacon beacon(int index) const;
 
+    [[nodiscard]] EspObject esp() const;
+
     void setPosEsp(const QPointF &pos);
 
     void moveEsp(const QPointF &pos);

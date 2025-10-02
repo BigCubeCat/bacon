@@ -1,5 +1,7 @@
 #include "mainwindow.hpp"
 
+#include <iostream>
+
 #include "ui_mainwindow.h"
 
 
@@ -18,6 +20,8 @@ MainWindow::MainWindow(Model *model, QWidget *parent)
 
     connect(m_beaconEditor, &BeaconEditor::accepted, m_model, &Model::beaconChanged);
     connect(m_model, &Model::signalBeaconsChanged, m_beaconEditor, &BeaconEditor::updateBeacons);
+
+    std::cout << m_model->beacons().size() << std::endl;
 }
 
 MainWindow::~MainWindow() {

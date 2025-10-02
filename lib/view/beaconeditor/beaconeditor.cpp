@@ -1,5 +1,7 @@
 #include "beaconeditor.hpp"
 
+#include <iostream>
+
 #include "ui_beaconeditor.h"
 
 BeaconEditor::BeaconEditor(Model *m, QWidget *parent) : QWidget(parent), m_ui(new Ui::BeaconEditor), m_model(m) {
@@ -15,6 +17,7 @@ BeaconEditor::BeaconEditor(Model *m, QWidget *parent) : QWidget(parent), m_ui(ne
         "beacon_8;-1.8;40.8\n");
 
     connect(m_ui->plainTextEdit, &QPlainTextEdit::textChanged, this, &BeaconEditor::updateText);
+    connect(m_ui->acceptButton, &QPushButton::clicked, this, &BeaconEditor::acceptedSlot);
 }
 
 BeaconEditor::~BeaconEditor() {
@@ -42,6 +45,7 @@ void BeaconEditor::parseBeacons(const QString &text) {
         }
         float x, y;
         try {
+            std::replace(token.begin(), token.end(), ',', '.');
             x = std::stof(token);
         } catch (const std::invalid_argument &e) {
             return std::nullopt;
@@ -52,11 +56,15 @@ void BeaconEditor::parseBeacons(const QString &text) {
             return std::nullopt;
         }
         try {
+            std::replace(token.begin(), token.end(), '.', ',');
             y = std::stof(token);
         } catch (const std::invalid_argument &e) {
             return std::nullopt;
         }
-        std::pair<QString, QPointF> result = {QString::fromStdString(token), {x, y}};
+        std::cout << x << " " << y << std::endl;
+        std::pair<QString, QPointF> result;
+        result.first = QString::fromStdString(name);
+        result.second = QPointF(x, y);
         return result;
     };
 
@@ -96,6 +104,11 @@ void BeaconEditor::updateBeacons() {
                 QString::fromStdString(std::to_string(pos.y())) + "\n";
     }
     m_ui->plainTextEdit->setPlainText(res);
+}
+
+void BeaconEditor::acceptedSlot() {
+    parseBeacons(m_ui->plainTextEdit->toPlainText());
+    emit accepted(m_beacons);
 }
 
 void BeaconEditor::setText(const QString &text) {

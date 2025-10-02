@@ -17,16 +17,20 @@ public:
     ~Scene() override;
 
 private:
+    Model *m_model;
     QGraphicsScene *m_scene;
     QGraphicsView *m_view;
     EspItem *m_esp;
 
-    QTimer *m_timer;
-
     QVBoxLayout *m_layout;
+
+    void setupBasicScene();
+
+    void clearScene();
 
 public slots:
     void beaconChanged();
+    void espChanged();
 };
 
 #endif //APP_SCENE_HPP
