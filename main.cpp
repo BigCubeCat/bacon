@@ -28,16 +28,22 @@ int main(int argc, char* argv[]) {
     // Создаем таймер
     QTimer timer;
 
-    int i = 0;
+    float i = 0;
+    float x, y;
+    float size = 2;
 
     // Подключаем сигнал timeout к лямбда-функции
     QObject::connect(&timer, &QTimer::timeout, [&]() {
         std::cout << i << std::endl;
-        model->addPointToPath(QPointF(0, ++i));
+        x = std::cos(i) * size;
+        y = std::sin(i) * size;
+        i += 0.1;
+        size += 0.01;
+        model->addPointToPath(QPointF(x, y));
     });
 
     // Таймер срабатывает каждые 1000 мс (1 секунда)
-    timer.start(1000);
+    timer.start(100);
 
     return QApplication::exec();
 }

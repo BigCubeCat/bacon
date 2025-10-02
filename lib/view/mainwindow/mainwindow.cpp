@@ -17,6 +17,8 @@ MainWindow::MainWindow(Model* model, QWidget* parent)
       m_scene(new Scene(m_model)) {
     m_ui->setupUi(this);
 
+    setWindowTitle("Bacon");
+
     m_ui->tabWidget->removeTab(0);
     m_ui->tabWidget->removeTab(0);
     m_ui->tabWidget->addTab(m_pathController, "Controller");
@@ -36,6 +38,12 @@ MainWindow::MainWindow(Model* model, QWidget* parent)
     connect(m_model, &Model::pointAddedSignal, m_pathController,
             &PathController::addPathPoint);
 
+    setWindowIcon(QIcon(":/assets/assets/icon.png"));
+    m_ui->actionOpen_beacon->setIcon(QIcon(":/assets/assets/open.png"));
+    m_ui->actionSave_beacon->setIcon(QIcon(":/assets/assets/save.png"));
+    m_ui->actionSave_Path->setIcon(QIcon(":/assets/assets/save.png"));
+    m_ui->actionOpen_path->setIcon(QIcon(":/assets/assets/open.png"));
+
     connect(m_ui->actionOpen_beacon, &QAction::triggered, m_beaconEditor,
             &BeaconEditor::openFile);
     connect(m_ui->actionSave_beacon, &QAction::triggered, m_beaconEditor,
@@ -48,7 +56,7 @@ MainWindow::MainWindow(Model* model, QWidget* parent)
             &MainWindow::savePathFile);
 
     connect(m_model, &Model::pathChanged, m_pathController, &PathController::setPath);
-
+    
     m_beaconEditor->acceptedSlot();
 }
 
