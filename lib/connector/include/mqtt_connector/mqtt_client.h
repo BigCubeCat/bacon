@@ -126,6 +126,10 @@ public:
     Q_SIGNALS:
     void addPathPoint(const QPointF &pos);
 
+public slots:
+    void initOnChange(const QString &url);
+    void setFreqOnChange(float freq);    
+
 private:
     std::unique_ptr<ConnectionManager> connection_manager_;
     std::unique_ptr<MessageHandler> message_handler_;
@@ -146,6 +150,8 @@ private:
      * @brief Восстановление подписок после переподключения
      */
     void restoreSubscriptions();
+
+    float m_freq = 1.0f;
 };
 
 } // namespace mqtt_connector

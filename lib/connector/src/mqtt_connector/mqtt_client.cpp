@@ -35,6 +35,14 @@ bool MqttClient::initialize(const ConnectionConfig& config) {
     }
     
     initialized_ = true;
+
+    
+
+    subscribe("hakaton/board", 0, [this](const Message& msg) {
+        std::cout << "Message received: " << msg.payload << std::endl;
+
+    });
+
     return true;
 }
 
@@ -239,6 +247,30 @@ std::string MqttClient::getStatus() const {
     }
     
     return status.str();
+}
+
+void MqttClient::initOnChange(const QString &url) {
+    QStringList parts = url.split(':');
+    ConnectionConfig config;
+
+    if (parts.size() == 2) {
+        config.broker_host = parts[0].toStdString();
+        config.broker_port = parts[1].toInt();
+    } else {
+        config.broker_host = url.toStdString();
+        config.broker_port = 1883; // стандартный порт MQTT
+    }
+    
+    config.client_id = "client_id"; 
+    config.keep_alive_interval = 60;
+    config.clean_session = true;
+    config.connection_timeout = 30;
+    config.use_ssl = false;
+    initialize(config);
+}
+
+void MqttClient::setFreqOnChange(float freq) {
+    m_freq = freq;
 }
 
 void MqttClient::onMessageReceived(const Message& message) {
