@@ -1,19 +1,30 @@
 #pragma once
 
+#include "types.h"
+#include "message_handler.h"
+#include "connection_manager.h"
 #include <memory>
 #include <vector>
 #include <mutex>
 
-#include "types.h"
-#include "message_handler.h"
-#include "connection_manager.h"
+#include <QObject>
+
+#include <mqtt/callback.h>
+
+class callback : public virtual mqtt::callback {
+    void message_arrived(mqtt::const_message_ptr msg) override {
+        std::cout << "Message received: " << msg->get_payload_str() << std::endl;
+    }
+};
 
 namespace mqtt_connector {
 
 /**
  * @brief Основной класс MQTT клиента для приема сообщений
  */
-class MqttClient {
+class MqttClient : public QObject {
+    Q_OBJECT
+    
 public:
     MqttClient();
     ~MqttClient();
@@ -111,6 +122,9 @@ public:
      * @return Строка с информацией о состоянии
      */
     std::string getStatus() const;
+
+    Q_SIGNALS:
+    void addPathPoint(const QPointF &pos);
 
 private:
     std::unique_ptr<ConnectionManager> connection_manager_;

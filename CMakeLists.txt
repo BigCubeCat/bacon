@@ -8,6 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+set(CMAKE_PREFIX_PATH "/home/pyro/Qt/6.8.3/gcc_64/lib/cmake")
 
 find_package(Qt6 COMPONENTS
         Core
@@ -19,6 +20,7 @@ qt6_add_resources(RESOURCES resources.qrc)
 
 add_subdirectory(lib/model)
 add_subdirectory(lib/view)
+add_subdirectory(lib/connector)
 
 add_executable(app main.cpp)
 target_link_libraries(app

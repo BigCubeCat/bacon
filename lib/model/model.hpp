@@ -5,12 +5,13 @@
 
 #include "beacon.hpp"
 #include "espobject.hpp"
+#include "mqtt_connector/mqtt_client.h"
 
 class Model : public QObject {
     Q_OBJECT
 
    public:
-    explicit Model();
+    explicit Model(mqtt_connector::MqttClient* connector);
 
     [[nodiscard]] QList<Beacon> beacons() const;
 
@@ -53,6 +54,8 @@ class Model : public QObject {
     float m_freq;
 
     bool m_running = true;
+
+    mqtt_connector::MqttClient* m_connector;
 
    public slots:
     void beaconChanged(const QList<Beacon>& beacons);

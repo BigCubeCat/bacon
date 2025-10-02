@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Model::Model() : m_esp(QString("esp"), QPointF(10.0, 10.0)) {}
+Model::Model(mqtt_connector::MqttClient* connector) : m_esp(QString("esp"), QPointF(10.0, 10.0)), m_connector(connector) {}
 
 QList<Beacon> Model::beacons() const {
     return m_beacons;
