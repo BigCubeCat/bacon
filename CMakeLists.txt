@@ -8,8 +8,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(CMAKE_PREFIX_PATH "/home/pyro/Qt/6.8.3/gcc_64/lib/cmake")
-
 find_package(Qt6 COMPONENTS
         Core
         Gui
@@ -36,4 +34,3 @@ target_link_libraries(app
         mainwindow
         model
 )
-

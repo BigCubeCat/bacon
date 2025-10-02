@@ -34,6 +34,8 @@ MainWindow::MainWindow(Model *model, QWidget *parent)
 
     connect(m_ui->actionOpen_beacon, &QAction::triggered, m_beaconEditor, &BeaconEditor::openFile);
     connect(m_ui->actionSave_beacon, &QAction::triggered, m_beaconEditor, &BeaconEditor::saveIntoFile);
+
+    m_beaconEditor->acceptedSlot();
 }
 
 MainWindow::~MainWindow() {

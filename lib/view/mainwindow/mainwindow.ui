@@ -76,6 +76,10 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen_beacon">
+   <property name="icon">
+    <iconset resource="../../../resources.qrc">
+     <normaloff>:/assets/assets/open.png</normaloff>:/assets/assets/open.png</iconset>
+   </property>
    <property name="text">
     <string>Open .beacon</string>
    </property>
@@ -84,6 +88,10 @@
    </property>
   </action>
   <action name="actionSave_beacon">
+   <property name="icon">
+    <iconset resource="../../../resources.qrc">
+     <normaloff>:/assets/assets/save.png</normaloff>:/assets/assets/save.png</iconset>
+   </property>
    <property name="text">
     <string>Save .beacon</string>
    </property>
@@ -92,6 +100,10 @@
    </property>
   </action>
   <action name="actionOpen_path">
+   <property name="icon">
+    <iconset resource="../../../resources.qrc">
+     <normaloff>:/assets/assets/open.png</normaloff>:/assets/assets/open.png</iconset>
+   </property>
    <property name="text">
     <string>Open path</string>
    </property>
@@ -100,6 +112,10 @@
    </property>
   </action>
   <action name="actionSave_Path">
+   <property name="icon">
+    <iconset resource="../../../resources.qrc">
+     <normaloff>:/assets/assets/save.png</normaloff>:/assets/assets/save.png</iconset>
+   </property>
    <property name="text">
     <string>Save Path</string>
    </property>
