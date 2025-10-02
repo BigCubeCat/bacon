@@ -10,6 +10,8 @@
     - либо IPv4: 0-255.0-255.0-255.0-255
     - обязательный порт: ":" + 1-65535
 */
-bool isValidIPv4WithPort(const QString& input);
+bool isValidIPv4WithPort(const QString &input);
+
+std::string currentTime();
 
 #endif

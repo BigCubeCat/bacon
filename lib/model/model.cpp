@@ -2,7 +2,9 @@
 
 #include <iostream>
 
-Model::Model(mqtt_connector::MqttClient* connector) : m_esp(QString("esp"), QPointF(10.0, 10.0)), m_connector(connector) {}
+Model::Model(mqtt_connector::MqttClient *connector)
+    : m_esp(QString("esp"), QPointF(10.0, 10.0)), m_connector(connector) {
+}
 
 QList<Beacon> Model::beacons() const {
     return m_beacons;
@@ -16,11 +18,11 @@ EspObject Model::esp() const {
     return m_esp;
 }
 
-void Model::setPosEsp(const QPointF& pos) {
+void Model::setPosEsp(const QPointF &pos) {
     m_esp.setPos(pos);
 }
 
-void Model::moveEsp(const QPointF& pos) {
+void Model::moveEsp(const QPointF &pos) {
     m_esp.move(pos);
 }
 
@@ -28,30 +30,45 @@ void Model::clearPath() {
     m_path.clear();
 }
 
-void Model::addPointToPath(const QPointF& pos) {
+void Model::addPointToPath(const QPointF &pos) {
     m_path.append(pos);
+    m_esp.setPos(pos);
+    emit dataChanged();
+    emit pointAddedSignal(pos);
 }
 
 QList<QPointF> Model::path() const {
     return m_path;
 }
 
-void Model::updateBeacon(int index, const Beacon& beacon) {
+void Model::updateBeacon(int index, const Beacon &beacon) {
     m_beacons[index] = beacon;
-    emit signalBeaconsChanged();
+    QList<std::pair<QString, QPointF> > newBeacons;
+    for (int i  = 0; i < m_beacons.size(); ++i) {
+        newBeacons.append({m_beacons[i].name(), m_beacons[i].pos()});
+    }
+    emit signalBeaconsChanged(newBeacons);
 }
 
-void Model::addBeacon(const Beacon& beacon) {
+void Model::addBeacon(const Beacon &beacon) {
     m_beacons.append(beacon);
-    emit signalBeaconsChanged();
+    QList<std::pair<QString, QPointF> > newBeacons;
+    for (int i  = 0; i < m_beacons.size(); ++i) {
+        newBeacons.append({m_beacons[i].name(), m_beacons[i].pos()});
+    }
+    emit signalBeaconsChanged(newBeacons);
 }
 
-void Model::beaconChanged(const QList<Beacon>& beacons) {
+void Model::beaconChanged(const QList<Beacon> &beacons) {
     m_beacons = beacons;
-    emit signalBeaconsChanged();
+    QList<std::pair<QString, QPointF> > newBeacons;
+    for (int i  = 0; i < m_beacons.size(); ++i) {
+        newBeacons.append({m_beacons[i].name(), m_beacons[i].pos()});
+    }
+    emit signalBeaconsChanged(newBeacons);
 }
 
-void Model::pointAdded(const QPointF& point) {
+void Model::pointAdded(const QPointF &point) {
     if (!m_running) {
         return;
     }
@@ -64,7 +81,7 @@ void Model::onChangeFreq(float freq) {
     emit freqChanged(m_freq);
 }
 
-void Model::onUrlChanged(const QString& url) {
+void Model::onUrlChanged(const QString &url) {
     m_url = url;
     emit urlChanged(m_url);
 }

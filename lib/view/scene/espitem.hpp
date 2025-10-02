@@ -5,37 +5,49 @@
 #include <QPen>
 #include <QVector>
 
+#include "const.hpp"
+#include "waveitem.hpp"
+
 class EspItem : public QGraphicsEllipseItem {
 public:
-    EspItem(qreal radius = 8.0)
-        : QGraphicsEllipseItem(-radius, -radius, radius * 2, radius * 2) {
-        setBrush(Qt::red);
+    explicit EspItem(qreal radius = 8.0, qreal wave = 4, int countWaves = 3)
+        : QGraphicsEllipseItem(-radius, -radius, radius * 2, radius * 2), m_radius(radius * wave) {
+        setBrush(kPrimaryColor[0]);
+        setPen(Qt::NoPen);
         setZValue(10);
+
+        const auto msec = 100;
+        for (int i = 0; i < countWaves; i++) {
+            auto *waveItem = new WaveItem(
+                radius,
+                m_radius,
+                kPrimaryColor[0],
+                kPrimaryColor[2],
+                this,
+                msec,
+                m_radius * i * msec / countWaves
+            );
+            waveItem->setZValue(9);
+            m_waves.push_back(waveItem);
+        }
     }
 
-    void moveTo(const QPointF &p) {
-        setPos(p);
-        m_path << p;
-        updatePath();
+    ~EspItem() override {
+        for (int i = 0; i < m_waves.size(); i++) {
+            delete m_waves[i];
+        }
     }
 
-    QGraphicsPathItem* pathItem() { return &m_pathItem; }
+    QRectF boundingRect() const override {
+        return QRectF(-m_radius, -m_radius,
+                      m_radius * 2, m_radius * 2);
+    }
+
+    void moveTo(const QPointF &p) { setPos(p); }
 
 private:
-    void updatePath() {
-        QPainterPath path;
-        if (m_path.isEmpty()) return;
-        path.moveTo(m_path[0]);
-        for (int i = 1; i < m_path.size(); ++i)
-            path.lineTo(m_path[i]);
-
-        m_pathItem.setPath(path);
-        m_pathItem.setPen(QPen(Qt::darkRed, 2));
-        m_pathItem.setZValue(5);
-    }
-
-    QVector<QPointF> m_path;
-    QGraphicsPathItem m_pathItem;
+    QList<WaveItem *> m_waves;
+    qreal m_radius;
 };
 
-#endif //APP_ESPITEM_HPP
+#endif  //APP_ESPITEM_HPP

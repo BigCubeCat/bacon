@@ -14,7 +14,7 @@ find_package(Threads REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt6 COMPONENTS Widgets QUIET)
 
-# set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOMOC ON)
 
 set(CONNECTOR_SOURCES
     src/mqtt_connector/mqtt_client.cpp
@@ -110,8 +110,6 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${PAHO_MQTT_INCLUDE_DIRS}
 )
-
-# add_library(connector STATIC ${CONNECTOR_SOURCES} ${CONNECTOR_HEADERS})
 
 target_link_libraries(connector
     PRIVATE
