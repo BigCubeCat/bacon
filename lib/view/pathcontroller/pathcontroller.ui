@@ -19,14 +19,24 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>url</string>
+        <string>URL</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QLineEdit" name="urlEdit"/>
+        <widget class="QLineEdit" name="urlEdit">
+         <property name="toolTip">
+          <string>MQTT broker address</string>
+         </property>
+         <property name="inputMask">
+          <string>000.000.000.000:0000</string>
+         </property>
+         <property name="text">
+          <string extracomment="MQTT broker address">192.168.98.124:1883</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QPushButton" name="acceptUrlBtn">
@@ -46,7 +56,7 @@
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>frequency</string>
+        <string>Frequency</string>
        </property>
       </widget>
      </item>
@@ -59,6 +69,9 @@
          </property>
          <property name="maximum">
           <double>10.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>1.000000000000000</double>
          </property>
         </widget>
        </item>
@@ -80,7 +93,16 @@
     </layout>
    </item>
    <item>
-    <widget class="QTableView" name="tableView"/>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Path</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QTableView" name="tableView"/>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <widget class="QWidget" name="horizontalWidget_3" native="true">

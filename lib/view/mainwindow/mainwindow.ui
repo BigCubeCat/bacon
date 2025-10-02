@@ -23,13 +23,13 @@
      <widget class="QTabWidget" name="tabWidget">
       <property name="minimumSize">
        <size>
-        <width>300</width>
-        <height>0</height>
+        <width>380</width>
+        <height>380</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>300</width>
+        <width>400</width>
         <height>16777215</height>
        </size>
       </property>
