@@ -34,7 +34,6 @@ int main(int argc, char* argv[]) {
 
     // Подключаем сигнал timeout к лямбда-функции
     QObject::connect(&timer, &QTimer::timeout, [&]() {
-        std::cout << i << std::endl;
         x = std::cos(i) * size;
         y = std::sin(i) * size;
         i += 0.1;

@@ -4,10 +4,12 @@
 #include <QGraphicsView>
 #include <QMainWindow>
 #include <QVBoxLayout>
+#include <QPropertyAnimation>
 
 #include "espitem.hpp"
 #include "model.hpp"
 
+class PointItem;
 class Scene : public QWidget {
     Q_OBJECT
 
@@ -27,6 +29,8 @@ class Scene : public QWidget {
 
     QVBoxLayout* m_layout;
 
+    QList<PointItem*> m_items;
+
     void setupBasicScene();
 
     void clearScene();
@@ -39,6 +43,8 @@ class Scene : public QWidget {
     void beaconChanged();
 
     void espChanged();
+
+    void onPathChanged();
 };
 
 #endif  //APP_SCENE_HPP

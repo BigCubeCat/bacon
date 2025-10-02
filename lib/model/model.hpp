@@ -33,6 +33,8 @@ class Model : public QObject {
 
     void addBeacon(const Beacon& beacon);
 
+    [[nodiscard]] QString status() const;
+
    signals:
     void dataChanged();
     void pointAddedSignal(const QPointF& pnt);
@@ -52,6 +54,7 @@ class Model : public QObject {
     EspObject m_esp;
     QList<QPointF> m_path;
     QString m_url;
+    QString m_status = "None";
     float m_freq;
 
     bool m_running = false;
@@ -67,6 +70,10 @@ class Model : public QObject {
 
     void onStopped();
     void onStarted();
+
+    void onResetPath();
+
+    void onStatusChanged(const QString& status);
 };
 
 #endif  //APP_MODEL_HPP
