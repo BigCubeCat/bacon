@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <chrono>
 
 #include <QPointF>
 
@@ -14,6 +15,7 @@ MqttClient::MqttClient()
     : connection_manager_(std::make_unique<ConnectionManager>())
     , message_handler_(std::make_unique<MessageHandler>())
     , initialized_(false) {
+        navigator_ = std::make_unique<navigator::Navigator>(m_beacons);
 }
 
 MqttClient::~MqttClient() {
@@ -49,6 +51,9 @@ bool MqttClient::initialize(const ConnectionConfig& config) {
     // Hardcode:
     connection_manager_->getClient()->subscribe("hakaton/board", 1);
 
+    should_stop_processing_ = false;
+    processing_thread_ = std::thread(&MqttClient::dataProcessingLoop, this);
+
     emit setConnectStatus("Connected");
 
     return true;
@@ -56,6 +61,12 @@ bool MqttClient::initialize(const ConnectionConfig& config) {
 
 void MqttClient::shutdown() {
     emit setConnectStatus("Disconnected");
+
+    if (processing_thread_.joinable()) {
+        should_stop_processing_ = true;
+        processing_cv_.notify_all();
+        processing_thread_.join();
+    }
 
     if (!initialized_) {
         return;
@@ -329,6 +340,47 @@ void MqttClient::restoreSubscriptions() {
             }
         } catch (const std::exception&) {
             // Игнорируем ошибки восстановления подписок
+        }
+    }
+}
+
+void MqttClient::dataProcessingLoop() {
+    while (!should_stop_processing_) {
+        std::unique_lock<std::mutex> lock(processing_mutex_);
+        float current_freq;
+        {
+            std::lock_guard<std::mutex> freq_lock(m_freq_mutex_);
+            current_freq = m_freq;
+        }
+        
+        auto wait_duration = std::chrono::milliseconds(static_cast<int>(1000.0f / current_freq));
+        
+        if (processing_cv_.wait_for(lock, wait_duration) == std::cv_status::no_timeout) {
+            if (should_stop_processing_) {
+                break;
+            }
+        }
+
+        std::vector<std::pair<std::string, std::vector<message_objects::BLEBeaconState>>> collected_data;
+        {
+            std::lock_guard<std::mutex> data_lock(m_data_mutex_);
+            if (!m_data.empty()) {
+                for (const auto& pair : m_data) {
+                    collected_data.emplace_back(pair.first, pair.second);
+                }
+                m_data.clear();
+            }
+        }
+
+        if (navigator_ && !collected_data.empty()) {
+            try {
+                auto position = navigator_->calculatePosition(collected_data);
+                QPointF pos(position.first, position.second);
+                    
+                emit addPathPoint(pos);
+            } catch (const std::exception& e) {
+                std::cerr << "Error calculating position: " << e.what() << std::endl;
+            }
         }
     }
 }

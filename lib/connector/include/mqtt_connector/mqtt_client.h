@@ -10,6 +10,9 @@
 #include <memory>
 #include <vector>
 #include <mutex>
+#include <thread>
+#include <atomic>
+#include <condition_variable>
 
 #include <QObject>
 #include <QPointF>
@@ -172,6 +175,16 @@ private:
     mutable std::mutex m_beacons_mutex_;
 
     std::unique_ptr<navigator::Navigator> navigator_;
+
+    std::thread processing_thread_;
+    std::atomic<bool> should_stop_processing_{false};
+    std::condition_variable processing_cv_;
+    std::mutex processing_mutex_;
+
+    /**
+     * @brief Основная функция потока обработки данных
+     */
+    void dataProcessingLoop();
 };
 
 } // namespace mqtt_connector
