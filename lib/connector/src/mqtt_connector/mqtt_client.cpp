@@ -36,6 +36,7 @@ bool MqttClient::initialize(const ConnectionConfig& config) {
     connection_manager_->setMqttClient(this);
     
     if (!connection_manager_->connect(config)) {
+        emit setConnectStatus("Disconnected");
         return false;
     }
     
@@ -48,10 +49,14 @@ bool MqttClient::initialize(const ConnectionConfig& config) {
     // Hardcode:
     connection_manager_->getClient()->subscribe("hakaton/board", 1);
 
+    emit setConnectStatus("Connected");
+
     return true;
 }
 
 void MqttClient::shutdown() {
+    emit setConnectStatus("Disconnected");
+
     if (!initialized_) {
         return;
     }

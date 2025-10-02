@@ -134,6 +134,7 @@ public:
 
     Q_SIGNALS:
     void addPathPoint(const QPointF &pos);
+    void setConnectStatus(const QString &status);
 
 public slots:
     void initOnChange(const QString &url);
