@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(BUILD_STATIC "Build static library" ON)
 
 find_package(Threads REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 list(APPEND CMAKE_PREFIX_PATH "/usr/local")
 set(CMAKE_LIBRARY_PATH "${CMAKE_LIBRARY_PATH}:/usr/local/lib")
@@ -104,6 +105,7 @@ add_library(connector STATIC ${CONNECTOR_SOURCES} ${CONNECTOR_HEADERS})
 target_link_libraries(connector 
     ${PAHO_MQTT_LIBRARIES}
     Threads::Threads
+    Eigen3::Eigen
 )
 
 if(PAHO_MQTT_CPP_FOUND AND PAHO_MQTT_CPP_CFLAGS_OTHER)

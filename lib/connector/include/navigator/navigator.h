@@ -15,7 +15,7 @@ namespace navigator {
 
         // Теперь сюда передаётся вектор {имя маяка, список состояний}
         std::pair<double, double> calculatePosition(
-            const std::vector<std::pair<std::string, std::vector<message_objects::BLEBeaconState>>> &beaconStates) const;
+            const std::vector<std::pair<std::string, std::vector<message_objects::BLEBeaconState>>> &beaconMeasurements);
 
     private:
         // Список известных маяков
@@ -30,8 +30,9 @@ namespace navigator {
         // Конвертация RSSI → расстояние
         double rssiToDistance(int rssi, int txPower) const;
 
-        // Обновление скользящего среднего (EMA)
-        double updateEMA(const std::string &name, double newValue) const;
+        double calculateMedian(std::vector<double> &values) const;
+
+        double updateMovingAverage(const std::string &beaconName, double newValue);
 
         // Триангуляция по сглаженным расстояниям
         std::pair<double, double> trilateration(
