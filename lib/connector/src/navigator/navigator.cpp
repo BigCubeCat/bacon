@@ -100,11 +100,6 @@ namespace navigator {
                      - b0.y_*b0.y_ + bi.y_*bi.y_;
         }
 
-        Eigen::JacobiSVD<Eigen::MatrixXd> svd(A);
-        if (svd.singularValues().minCoeff() < 1e-8) {
-            throw std::runtime_error("Маяки почти коллинеарны, триангуляция нестабильна.");
-        }
-
         Eigen::Vector3d position = (A.transpose() * A).ldlt().solve(A.transpose() * b);
 
         return {position(0), position(1)};
