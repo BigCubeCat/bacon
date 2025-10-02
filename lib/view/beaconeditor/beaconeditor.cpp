@@ -1,7 +1,10 @@
 #include "beaconeditor.hpp"
 
+#include <cstddef>
 #include <sstream>
 #include <string>
+#include <QFileDialog>
+#include <QFile>
 
 #include "ui_beaconeditor.h"
 
@@ -19,6 +22,8 @@ BeaconEditor::BeaconEditor(Model *m, QWidget *parent) : QWidget(parent), m_ui(ne
 
     connect(m_ui->plainTextEdit, &QPlainTextEdit::textChanged, this, &BeaconEditor::updateText);
     connect(m_ui->acceptButton, &QPushButton::clicked, this, &BeaconEditor::acceptedSlot);
+    connect(m_ui->openButton, &QPushButton::clicked, this, &BeaconEditor::openFile);
+    connect(m_ui->saveButton, &QPushButton::clicked, this, &BeaconEditor::saveIntoFile);
 }
 
 BeaconEditor::~BeaconEditor() {
@@ -115,4 +120,48 @@ void BeaconEditor::setText(const QString &text) {
     parseBeacons(text);
     m_ui->plainTextEdit->setPlainText(text);
     update();
+}
+
+void BeaconEditor::openFile() {
+    QString filePath = QFileDialog::getOpenFileName(nullptr,
+        QObject::tr("Open File"), // Заголовок окна
+        QDir::currentPath(), // Начальная директория
+        QObject::tr("All Files (*);;Text Files (*.txt)") // Фильтры
+    );
+
+    QFile file(filePath);
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return;
+    }
+
+    QTextStream in(&file);
+    in.setEncoding(QStringConverter::Utf8);
+
+    QString fileContent = in.readAll();
+    file.close();
+
+    m_ui->plainTextEdit->setPlainText(fileContent);
+}
+
+void BeaconEditor::saveIntoFile() {
+    QString filePath = QFileDialog::getSaveFileName(nullptr,
+        QObject::tr("Save Text File"),
+        "",
+        "Text Files (*.txt);;All Files (*)"
+    );
+
+    QFile file(filePath);
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return;
+    }
+
+    QTextStream out(&file);
+    out.setEncoding(QStringConverter::Utf8);
+
+    QString content = m_ui->plainTextEdit->toPlainText();
+    out << content;
+
+    file.close();
 }
