@@ -17,6 +17,7 @@ find_package(Qt6 COMPONENTS
 
 qt6_add_resources(RESOURCES resources.qrc)
 
+add_subdirectory(lib/model)
 add_subdirectory(lib/view)
 
 add_executable(app main.cpp)
