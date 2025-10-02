@@ -41,7 +41,7 @@ class Model : public QObject {
 
     void oneBeaconChanged(int index);
 
-    void signalBeaconsChanged();
+    void signalBeaconsChanged(const QList<std::pair<QString, QPointF>> &newBeacons);
 
     void freqChanged(float f);
 
