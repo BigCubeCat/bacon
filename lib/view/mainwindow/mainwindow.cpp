@@ -1,12 +1,14 @@
 #include "mainwindow.hpp"
-#include <qpoint.h>
-#include <qtimer.h>
+
+#include <QFileDialog>
 
 #include "ui_mainwindow.h"
 
 #include <QObject>
 
-MainWindow::MainWindow(Model *model, QWidget *parent)
+#include "model_utils.hpp"
+
+MainWindow::MainWindow(Model* model, QWidget* parent)
     : QMainWindow(parent),
       m_ui(new Ui::MainWindow),
       m_model(model),
@@ -32,8 +34,16 @@ MainWindow::MainWindow(Model *model, QWidget *parent)
     connect(m_model, &Model::pointAddedSignal, m_pathController,
             &PathController::addPathPoint);
 
-    connect(m_ui->actionOpen_beacon, &QAction::triggered, m_beaconEditor, &BeaconEditor::openFile);
-    connect(m_ui->actionSave_beacon, &QAction::triggered, m_beaconEditor, &BeaconEditor::saveIntoFile);
+    connect(m_ui->actionOpen_beacon, &QAction::triggered, m_beaconEditor,
+            &BeaconEditor::openFile);
+    connect(m_ui->actionSave_beacon, &QAction::triggered, m_beaconEditor,
+            &BeaconEditor::saveIntoFile);
+
+    connect(m_ui->actionOpen_path, &QAction::triggered, this,
+            &MainWindow::openPathFile);
+
+    connect(m_ui->actionSave_Path, &QAction::triggered, this,
+            &MainWindow::savePathFile);
 
     m_beaconEditor->acceptedSlot();
 }
@@ -42,4 +52,37 @@ MainWindow::~MainWindow() {
     delete m_ui;
     delete m_beaconEditor;
     delete m_scene;
+}
+
+void MainWindow::openPathFile() {
+    QString filePath = QFileDialog::getOpenFileName(
+        nullptr,
+        QObject::tr("Open File"),  // Заголовок окна
+        QDir::currentPath(),       // Начальная директория
+        QObject::tr("All Files (*);;Text Files (*.txt)")  // Фильтры
+    );
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return;
+    }
+    QTextStream in(&file);
+    in.setEncoding(QStringConverter::Utf8);
+    const QString fileContent = in.readAll();
+    m_model->setPath(model_utils::parseContent(fileContent.toStdString()));
+}
+
+void MainWindow::savePathFile() {
+    QString filePath =
+        QFileDialog::getSaveFileName(nullptr, QObject::tr("Save Text File"), "",
+                                     "Text Files (*.txt);;All Files (*)");
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return;
+    }
+    QTextStream out(&file);
+    out.setEncoding(QStringConverter::Utf8);
+    const auto path = m_model->path();
+    const auto content = model_utils::fetchContent(path);
+    out << content;
+    file.close();
 }

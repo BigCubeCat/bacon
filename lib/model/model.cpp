@@ -89,6 +89,11 @@ void Model::onUrlChanged(const QString &url) {
     emit urlChanged(m_url);
 }
 
+void Model::setPath(const QList<QPointF>& path) {
+    m_path = path;
+    emit pathChanged();
+}
+
 void Model::onStopped() {
     std::cout << "stopped\n";
     m_running = false;
