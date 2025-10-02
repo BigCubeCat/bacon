@@ -3,10 +3,13 @@
 #include <stdexcept>
 #include <algorithm>
 #include <numeric>
+#include <unordered_map>
 #include <Eigen/Dense>
 
-Navigator::Navigator(const std::vector<BLEBeacon> &knownBeacons)
-    : knownBeacons_(const_cast<std::vector<BLEBeacon>&>(knownBeacons)) {}
+using namespace navigator;
+
+Navigator::Navigator(const std::vector<message_objects::BLEBeacon> &knownBeacons)
+    : knownBeacons_(const_cast<std::vector<message_objects::BLEBeacon>&>(knownBeacons)) {}
 
 double Navigator::rssiToDistance(int rssi, int txPower) const {
     constexpr double n = 3.0; // коэффициент затухания
@@ -14,16 +17,33 @@ double Navigator::rssiToDistance(int rssi, int txPower) const {
 }
 
 std::pair<double, double> Navigator::calculatePosition(
-    const std::vector<BLEBeaconState> &beaconStates) const
+    const std::vector<std::pair<std::string, std::vector<message_objects::BLEBeaconState>>> &beaconMeasurements)
 {
-    // Собираем расстояния до известных маяков
-    std::vector<std::pair<BLEBeacon, double>> distances;
-    for (const auto &state : beaconStates) {
+    // Собираем медианные расстояния до известных маяков
+    std::vector<std::pair<message_objects::BLEBeacon, double>> distances;
+
+    for (const auto &[beaconName, measurements] : beaconMeasurements) {
+        // Находим соответствующий известный маяк
         auto it = std::find_if(knownBeacons_.begin(), knownBeacons_.end(),
-                               [&state](const BLEBeacon &b) { return b.name_ == state.name; });
+                               [&beaconName](const message_objects::BLEBeacon &b) {
+                                   return b.name_ == beaconName;
+                               });
+
         if (it != knownBeacons_.end()) {
-            double d = rssiToDistance(state.rssi_, state.txPower_);
-            distances.emplace_back(*it, d);
+            // Рассчитываем дистанции для всех измерений
+            std::vector<double> measuredDistances;
+            for (const auto &measurement : measurements) {
+                double d = rssiToDistance(measurement.rssi_, measurement.txPower_);
+                measuredDistances.push_back(d);
+            }
+
+            // Вычисляем медиану дистанций
+            double medianDistance = calculateMedian(measuredDistances);
+
+            // Обновляем скользящее среднее и получаем сглаженное значение
+            double smoothedDistance = updateMovingAverage(beaconName, medianDistance);
+
+            distances.emplace_back(*it, smoothedDistance);
         }
     }
 
@@ -34,8 +54,44 @@ std::pair<double, double> Navigator::calculatePosition(
     return trilateration(distances);
 }
 
+double Navigator::calculateMedian(std::vector<double> &values) const {
+    if (values.empty()) {
+        throw std::runtime_error("Cannot calculate median of empty vector");
+    }
+
+    size_t n = values.size() / 2;
+    std::nth_element(values.begin(), values.begin() + n, values.end());
+
+    if (values.size() % 2 == 1) {
+        // Нечетное количество элементов
+        return values[n];
+    } else {
+        // Четное количество элементов - берем среднее двух центральных
+        double median1 = values[n];
+        std::nth_element(values.begin(), values.begin() + n - 1, values.end());
+        double median2 = values[n - 1];
+        return (median1 + median2) / 2.0;
+    }
+}
+
+double Navigator::updateMovingAverage(const std::string &beaconName, double newValue) {
+    // Ищем существующую запись
+    auto it = movingAverages_.find(beaconName);
+
+    if (it == movingAverages_.end()) {
+        // Первое значение для этого маяка
+        movingAverages_[beaconName] = newValue;
+        return newValue;
+    } else {
+        // Обновляем скользящее среднее
+        double &currentAverage = it->second;
+        currentAverage = alpha_ * newValue + (1 - alpha_) * currentAverage;
+        return currentAverage;
+    }
+}
+
 std::pair<double, double> Navigator::trilateration(
-    const std::vector<std::pair<BLEBeacon, double>> &distances) const
+    const std::vector<std::pair<message_objects::BLEBeacon, double>> &distances) const
 {
     const auto &[b0, r0] = distances[0];
 
@@ -65,4 +121,17 @@ std::pair<double, double> Navigator::trilateration(
 
     // Возвращаем только x, y
     return {position(0), position(1)};
+}
+
+// Метод для установки коэффициента сглаживания
+void Navigator::setSmoothingFactor(double alpha) {
+    if (alpha < 0.0 || alpha > 1.0) {
+        throw std::invalid_argument("Smoothing factor must be between 0 and 1");
+    }
+    alpha_ = alpha;
+}
+
+// Метод для сброса скользящих средних
+void Navigator::resetMovingAverages() {
+    movingAverages_.clear();
 }
