@@ -35,7 +35,8 @@ public slots:
     void setText(const QString &text);
     void updateText();
     void updateBeacons();
-
+    void openFile();
+    void saveIntoFile();
     void acceptedSlot();
 
 signals:
