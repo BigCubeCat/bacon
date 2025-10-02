@@ -1,13 +1,46 @@
-cmake_minimum_required(VERSION 3.16)
-project(connector VERSION 1.0.0 LANGUAGES C CXX)
+# cmake_minimum_required(VERSION 3.16)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+project(connector VERSION 1.0.0)
 
-option(BUILD_STATIC "Build static library" ON)
+# set(CMAKE_CXX_STANDARD 17)
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# option(BUILD_STATIC "Build static library" ON)
 
 find_package(Threads REQUIRED)
 find_package(Eigen3 REQUIRED)
+
+# set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};~/Qt/6.8.3/gcc_64")
+
+find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 COMPONENTS Widgets QUIET)
+
+set(CMAKE_AUTOMOC ON)
+
+set(CONNECTOR_SOURCES
+    src/mqtt_connector/mqtt_client.cpp
+    src/mqtt_connector/message_handler.cpp
+    src/mqtt_connector/connection_manager.cpp
+    src/navigator/navigator.cpp
+    src/config/config.cpp
+)
+
+set(CONNECTOR_HEADERS
+    include/mqtt_connector/mqtt_client.h
+    include/mqtt_connector/message_handler.h
+    include/mqtt_connector/connection_manager.h
+    include/mqtt_connector/types.h
+    include/message_objects/BLE.h
+    include/navigator/navigator.h
+    include/config/config.h
+    include/json.hpp
+)
+
+qt_add_library(
+    connector
+    ${CONNECTOR_SOURCES}
+    ${CONNECTOR_HEADERS}
+)
 
 list(APPEND CMAKE_PREFIX_PATH "/usr/local")
 set(CMAKE_LIBRARY_PATH "${CMAKE_LIBRARY_PATH}:/usr/local/lib")
@@ -82,29 +115,11 @@ include_directories(
     ${PAHO_MQTT_INCLUDE_DIRS}
 )
 
-set(CONNECTOR_SOURCES
-    src/mqtt_connector/mqtt_client.cpp
-    src/mqtt_connector/message_handler.cpp
-    src/mqtt_connector/connection_manager.cpp
-    src/navigator/navigator.cpp
-    src/config/config.cpp
-)
-
-set(CONNECTOR_HEADERS
-    include/mqtt_connector/mqtt_client.h
-    include/mqtt_connector/message_handler.h
-    include/mqtt_connector/connection_manager.h
-    include/mqtt_connector/types.h
-    include/message_objects/BLE.h
-    include/navigator/navigator.h
-    include/config/config.h
-)
-
-add_library(connector STATIC ${CONNECTOR_SOURCES} ${CONNECTOR_HEADERS})
-
-target_link_libraries(connector 
+target_link_libraries(connector
+    PRIVATE
     ${PAHO_MQTT_LIBRARIES}
     Threads::Threads
+    Qt6::Core
     Eigen3::Eigen
 )
 
