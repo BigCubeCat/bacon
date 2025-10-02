@@ -5,6 +5,9 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <chrono>
+
+#include <QPointF>
 
 namespace mqtt_connector {
 
@@ -12,6 +15,7 @@ MqttClient::MqttClient()
     : connection_manager_(std::make_unique<ConnectionManager>())
     , message_handler_(std::make_unique<MessageHandler>())
     , initialized_(false) {
+        navigator_ = std::make_unique<navigator::Navigator>(m_beacons);
 }
 
 MqttClient::~MqttClient() {
@@ -34,6 +38,7 @@ bool MqttClient::initialize(const ConnectionConfig& config) {
     connection_manager_->setMqttClient(this);
     
     if (!connection_manager_->connect(config)) {
+        emit setConnectStatus("Disconnected");
         return false;
     }
     
@@ -46,10 +51,23 @@ bool MqttClient::initialize(const ConnectionConfig& config) {
     // Hardcode:
     connection_manager_->getClient()->subscribe("hakaton/board", 1);
 
+    should_stop_processing_ = false;
+    processing_thread_ = std::thread(&MqttClient::dataProcessingLoop, this);
+
+    emit setConnectStatus("Connected");
+
     return true;
 }
 
 void MqttClient::shutdown() {
+    emit setConnectStatus("Disconnected");
+
+    if (processing_thread_.joinable()) {
+        should_stop_processing_ = true;
+        processing_cv_.notify_all();
+        processing_thread_.join();
+    }
+
     if (!initialized_) {
         return;
     }
@@ -263,7 +281,7 @@ void MqttClient::addBLEBeaconState(const std::string& key, const message_objects
 }
 
 bool MqttClient::BLEBeaconContains(const std::string& name) {
-    std::lock_guard<std::mutex> lock(m_data_mutex_);
+    std::lock_guard<std::mutex> lock(m_beacons_mutex_);
     return std::any_of(m_beacons.begin(), m_beacons.end(), [&name](const message_objects::BLEBeacon& beacon) {
         return beacon.name_ == name;
     });
@@ -291,7 +309,20 @@ void MqttClient::initOnChange(const QString &url) {
 }
 
 void MqttClient::setFreqOnChange(float freq) {
+    std::lock_guard<std::mutex> lock(m_freq_mutex_);
     m_freq = freq;
+}
+
+void MqttClient::setBeacons(const QList<QPair<QString, QPointF>> &newBeacons) {
+    std::lock_guard<std::mutex> lock(m_beacons_mutex_);
+    m_beacons.clear();
+    for (const auto& pair : newBeacons) {
+        message_objects::BLEBeacon beacon;
+        beacon.name_ = pair.first.toStdString();
+        beacon.x_ = pair.second.x();
+        beacon.y_ = pair.second.y();
+        m_beacons.push_back(beacon);
+    }
 }
 
 void MqttClient::onMessageReceived(const Message& message) {
@@ -309,6 +340,47 @@ void MqttClient::restoreSubscriptions() {
             }
         } catch (const std::exception&) {
             // Игнорируем ошибки восстановления подписок
+        }
+    }
+}
+
+void MqttClient::dataProcessingLoop() {
+    while (!should_stop_processing_) {
+        std::unique_lock<std::mutex> lock(processing_mutex_);
+        float current_freq;
+        {
+            std::lock_guard<std::mutex> freq_lock(m_freq_mutex_);
+            current_freq = m_freq;
+        }
+        
+        auto wait_duration = std::chrono::milliseconds(static_cast<int>(1000.0f / current_freq));
+        
+        if (processing_cv_.wait_for(lock, wait_duration) == std::cv_status::no_timeout) {
+            if (should_stop_processing_) {
+                break;
+            }
+        }
+
+        std::vector<std::pair<std::string, std::vector<message_objects::BLEBeaconState>>> collected_data;
+        {
+            std::lock_guard<std::mutex> data_lock(m_data_mutex_);
+            if (!m_data.empty()) {
+                for (const auto& pair : m_data) {
+                    collected_data.emplace_back(pair.first, pair.second);
+                }
+                m_data.clear();
+            }
+        }
+
+        if (navigator_ && !collected_data.empty()) {
+            try {
+                auto position = navigator_->calculatePosition(collected_data);
+                QPointF pos(position.first, position.second);
+                    
+                emit addPathPoint(pos);
+            } catch (const std::exception& e) {
+                std::cerr << "Error calculating position: " << e.what() << std::endl;
+            }
         }
     }
 }

@@ -4,13 +4,20 @@
 #include "message_handler.h"
 #include "message_objects/BLE.h"
 #include "connection_manager.h"
+#include "navigator/navigator.h"
 
 #include <mqtt/callback.h>
 #include <memory>
 #include <vector>
 #include <mutex>
+#include <thread>
+#include <atomic>
+#include <condition_variable>
 
 #include <QObject>
+#include <QPointF>
+#include <QPair>
+#include <QList>
 
 namespace mqtt_connector {
 
@@ -118,8 +125,6 @@ public:
      */
     std::string getStatus() const;
 
-    const std::vector<message_objects::BLEBeacon>& getBeacons() const { return m_beacons; }
-
     void setBLEBeaconState(const std::string& key, const std::vector<message_objects::BLEBeaconState>& states);
     void addBLEBeaconState(const std::string& key, const message_objects::BLEBeaconState& state);
     
@@ -132,10 +137,12 @@ public:
 
     Q_SIGNALS:
     void addPathPoint(const QPointF &pos);
+    void setConnectStatus(const QString &status);
 
 public slots:
     void initOnChange(const QString &url);
-    void setFreqOnChange(float freq);    
+    void setFreqOnChange(float freq);
+    void setBeacons(const QList<QPair<QString, QPointF>> &newBeacons);
 
 private:
     std::unique_ptr<ConnectionManager> connection_manager_;
@@ -159,11 +166,25 @@ private:
     void restoreSubscriptions();
 
     float m_freq = 1.0f;
+    mutable std::mutex m_freq_mutex_;
 
     std::map<std::string, std::vector<message_objects::BLEBeaconState>> m_data;
     mutable std::mutex m_data_mutex_;
 
     std::vector<message_objects::BLEBeacon> m_beacons;
+    mutable std::mutex m_beacons_mutex_;
+
+    std::unique_ptr<navigator::Navigator> navigator_;
+
+    std::thread processing_thread_;
+    std::atomic<bool> should_stop_processing_{false};
+    std::condition_variable processing_cv_;
+    std::mutex processing_mutex_;
+
+    /**
+     * @brief Основная функция потока обработки данных
+     */
+    void dataProcessingLoop();
 };
 
 } // namespace mqtt_connector
