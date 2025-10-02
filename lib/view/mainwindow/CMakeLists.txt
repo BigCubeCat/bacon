@@ -1,7 +1,8 @@
-qt_add_library(mainwindow STATIC
+qt_add_library(mainwindow SHARED
         mainwindow.cpp
         mainwindow.hpp
         mainwindow.ui
+        ../../../resources.qrc
 )
 
 target_link_libraries(mainwindow PUBLIC
@@ -13,4 +14,7 @@ target_link_libraries(mainwindow PUBLIC
         model
 )
 
-target_include_directories(mainwindow PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(mainwindow PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_BINARY_DIR}
+)

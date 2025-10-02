@@ -31,6 +31,12 @@ MainWindow::MainWindow(Model* model, QWidget* parent)
     connect(m_model, &Model::dataChanged, m_scene, &Scene::espChanged);
     connect(m_model, &Model::pointAddedSignal, m_pathController,
             &PathController::addPathPoint);
+
+    setWindowIcon(QIcon(":/assets/assets/icon.png"));
+    m_ui->actionOpen_beacon->setIcon(QIcon(":/assets/assets/open.png"));
+    m_ui->actionSave_beacon->setIcon(QIcon(":/assets/assets/save.png"));
+    m_ui->actionSave_Path->setIcon(QIcon(":/assets/assets/save.png"));
+    m_ui->actionOpen_path->setIcon(QIcon(":/assets/assets/open.png"));
 }
 
 MainWindow::~MainWindow() {
