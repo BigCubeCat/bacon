@@ -13,6 +13,7 @@ MainWindow::MainWindow(Model *model, QWidget *parent)
 
     m_ui->tabWidget->removeTab(0);
     m_ui->tabWidget->removeTab(0);
+    m_ui->tabWidget->addTab(m_beaconEditor, "Beacon Editor");
     m_ui->scrollArea->setWidget(m_scene);
 }
 

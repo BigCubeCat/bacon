@@ -26,8 +26,12 @@ public:
 private:
     Ui::BeaconEditor *m_ui;
 
+    QList<Beacon *> m_beacons;
+    void parseBeacons(const QString &text);
+
 public slots:
     void setText(const QString &text);
+    void updateText();
 
 signals:
     void accepted(const QList<Beacon*> &beacons);
