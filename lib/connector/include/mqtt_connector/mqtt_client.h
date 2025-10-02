@@ -2,7 +2,6 @@
 
 #include "types.h"
 #include "message_handler.h"
-#include "connection_manager.h"
 #include "message_objects/BLE.h"
 
 #include <mqtt/callback.h>
