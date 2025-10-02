@@ -1,6 +1,8 @@
 #pragma once
+
 #include <string>
 #include <vector>
+
 #include "message_objects/BLE.h" // здесь у тебя объявлен struct BLEBeacon
 
 class ConfigReader {

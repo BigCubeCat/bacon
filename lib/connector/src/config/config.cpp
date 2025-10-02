@@ -1,5 +1,6 @@
 #include "config/config.h"
-#include "message_object/BLE.h"
+#include "message_objects/BLE.h"
+
 #include <fstream>
 #include <sstream>
 #include <stdexcept>

@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QObject>
 
 #include "mainwindow.hpp"
 #include "model.hpp"
@@ -21,6 +22,8 @@ int main(int argc, char* argv[]) {
 
     QObject::connect(conn.get(), &mqtt_connector::MqttClient::addPathPoint,
                      model.get(), &Model::addPointToPath);
+
+    QObject::connect(model.get(), &Model::urlChanged, conn.get(), &mqtt_connector::MqttClient::initOnChange);
 
     // Создаем таймер
     QTimer timer;

@@ -3,6 +3,7 @@
 #include <mqtt/async_client.h>
 #include <mqtt/message.h>
 #include <algorithm>
+#include <fstream>
 #include <sstream>
 
 namespace mqtt_connector {
@@ -29,12 +30,22 @@ bool MqttClient::initialize(const ConnectionConfig& config) {
             restoreSubscriptions();
         }
     });
+
+    connection_manager_->setMqttClient(this);
     
     if (!connection_manager_->connect(config)) {
         return false;
     }
     
     initialized_ = true;
+
+    // subscribe("hakaton/board", 1, [this, &out](const Message& msg) {
+    //     std::cout << "Message received: " << msg.payload << std::endl;
+    // });
+
+    // Hardcode:
+    connection_manager_->getClient()->subscribe("hakaton/board", 1);
+
     return true;
 }
 
@@ -239,6 +250,48 @@ std::string MqttClient::getStatus() const {
     }
     
     return status.str();
+}
+
+void MqttClient::setBLEBeaconState(const std::string& key, const std::vector<message_objects::BLEBeaconState>& states) {
+    std::lock_guard<std::mutex> lock(m_data_mutex_);
+    m_data[key] = states;
+}
+
+void MqttClient::addBLEBeaconState(const std::string& key, const message_objects::BLEBeaconState& state) {
+    std::lock_guard<std::mutex> lock(m_data_mutex_);
+    m_data[key].push_back(state);
+}
+
+bool MqttClient::BLEBeaconContains(const std::string& name) {
+    std::lock_guard<std::mutex> lock(m_data_mutex_);
+    return std::any_of(m_beacons.begin(), m_beacons.end(), [&name](const message_objects::BLEBeacon& beacon) {
+        return beacon.name_ == name;
+    });
+}
+
+void MqttClient::initOnChange(const QString &url) {
+    QStringList parts = url.split(':');
+    ConnectionConfig config;
+
+    if (parts.size() == 2) {
+        config.broker_host = parts[0].toStdString();
+        config.broker_port = parts[1].toInt();
+    } else {
+        config.broker_host = url.toStdString();
+        config.broker_port = 1883; // стандартный порт MQTT
+    }
+    
+    config.client_id = "client_id"; 
+    config.keep_alive_interval = 60;
+    config.clean_session = true;
+    config.connection_timeout = 30;
+    config.use_ssl = false;
+
+    initialize(config);
+}
+
+void MqttClient::setFreqOnChange(float freq) {
+    m_freq = freq;
 }
 
 void MqttClient::onMessageReceived(const Message& message) {
