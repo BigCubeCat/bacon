@@ -5,6 +5,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <unordered_map>
+#include <algorithm>
 
 using namespace message_objects;
 
@@ -24,11 +25,31 @@ Navigator::Navigator(const std::vector<BLEBeacon>& knownBeacons, double alpha,
 
 // --- calculatePosition ---
 std::pair<double, double> Navigator::calculatePosition(
-    std::vector<std::pair<std::string, std::vector<BLEBeaconState>>>&
-        beaconMeasurements) {
+    const std::vector<BLEBeaconState>& beaconStates) {
     std::vector<std::pair<BLEBeacon, double>> distances;
 
-    for (const auto& [beaconName, measurements] : beaconMeasurements) {
+    // Группируем измерения по именам маяков
+    std::unordered_map<std::string, std::vector<double>> beaconDistances;
+    
+    for (const auto& state : beaconStates) {
+        auto it = std::find_if(knownBeacons_.begin(), knownBeacons_.end(),
+                               [&state](const BLEBeacon& b) {
+                                   return b.name_ == state.name_;
+                               });
+        if (it == knownBeacons_.end())
+            continue;
+
+        double distance = rssiToDistance(state.rssi_, state.txPower_);
+        if (distance > 0.1 && distance <= 50.0) { // Разумные пределы расстояния
+            beaconDistances[state.name_].push_back(distance);
+        }
+    }
+
+    // Обрабатываем каждый маяк
+    for (const auto& [beaconName, measuredDistances] : beaconDistances) {
+        if (measuredDistances.empty())
+            continue;
+
         auto it = std::find_if(knownBeacons_.begin(), knownBeacons_.end(),
                                [&beaconName](const BLEBeacon& b) {
                                    return b.name_ == beaconName;
@@ -36,25 +57,24 @@ std::pair<double, double> Navigator::calculatePosition(
         if (it == knownBeacons_.end())
             continue;
 
-        std::vector<double> measuredDistances;
-        for (const auto& measurement : measurements) {
-            double d = rssiToDistance(measurement.rssi_, measurement.txPower_);
-            if (d <= 30.0)
-                measuredDistances.push_back(d);  // отбрасываем шум
+        double filteredDistance;
+        if (measuredDistances.size() == 1) {
+            filteredDistance = measuredDistances[0];
+        } else {
+            std::vector<double> distances_copy = measuredDistances;
+            filteredDistance = calculateMedian(distances_copy);
         }
-        if (measuredDistances.empty())
-            continue;
+        
+        double smoothedDistance = updateMovingAverage(beaconName, filteredDistance);
 
-        double filteredDistance = calculateMedian(measuredDistances);
-        double smoothedDistance =
-            updateMovingAverage(beaconName, filteredDistance);
-
-        // ограничение скачка
-        constexpr double maxJump = 5.0;
+        // Более мягкое ограничение скачка
+        constexpr double maxJump = 8.0;
         auto prevIt = emaMap_.find(beaconName);
         if (prevIt != emaMap_.end() &&
             std::abs(smoothedDistance - prevIt->second) > maxJump) {
-            smoothedDistance = prevIt->second;
+            // Не полностью игнорируем, а делаем промежуточное значение
+            smoothedDistance = prevIt->second + 
+                (smoothedDistance > prevIt->second ? maxJump : -maxJump);
         }
 
         distances.emplace_back(*it, smoothedDistance);
@@ -74,23 +94,42 @@ double Navigator::calculateMedian(std::vector<double>& values) const {
         throw std::runtime_error("Empty vector for median");
 
     std::sort(values.begin(), values.end());
-    double q1 = values[values.size() / 4];
-    double q3 = values[3 * values.size() / 4];
+    
+    // Если мало данных, возвращаем простую медиану
+    if (values.size() < 4) {
+        size_t n = values.size() / 2;
+        if (values.size() % 2 == 1)
+            return values[n];
+        else
+            return (values[n - 1] + values[n]) / 2.0;
+    }
+
+    // Правильное вычисление квартилей
+    size_t n = values.size();
+    size_t q1_idx = n / 4;
+    size_t q3_idx = 3 * n / 4;
+    
+    double q1 = values[q1_idx];
+    double q3 = values[q3_idx];
     double iqr = q3 - q1;
 
+    // Фильтруем выбросы только если IQR значимый
     std::vector<double> filtered;
-    for (double v : values) {
-        if (v >= q1 - 1.5 * iqr && v <= q3 + 1.5 * iqr)
-            filtered.push_back(v);
+    if (iqr > 0.1) {  // Избегаем деления на очень маленький IQR
+        for (double v : values) {
+            if (v >= q1 - 1.5 * iqr && v <= q3 + 1.5 * iqr)
+                filtered.push_back(v);
+        }
     }
-    if (filtered.empty())
-        filtered = values;
+    
+    if (filtered.empty() || filtered.size() < values.size() / 2)
+        filtered = values;  // Если отфильтровали слишком много, берем все
 
-    size_t n = filtered.size() / 2;
+    size_t median_idx = filtered.size() / 2;
     if (filtered.size() % 2 == 1)
-        return filtered[n];
+        return filtered[median_idx];
     else
-        return (filtered[n - 1] + filtered[n]) / 2.0;
+        return (filtered[median_idx - 1] + filtered[median_idx]) / 2.0;
 }
 
 // --- updateMovingAverage ---
@@ -107,14 +146,21 @@ double Navigator::updateMovingAverage(const std::string& beaconName,
     }
 }
 
-// --- RSSI → расстояние (переписано) ---
+// --- RSSI → расстояние (улучшенная формула) ---
 double Navigator::rssiToDistance(int rssi, int txPower) const {
-    constexpr double n = 3.0;  // indoor, меньше чем 3
-    double distance = std::pow(10.0, (txPower - rssi) / (10.0 * n));
-    return std::max(distance, 0.5);  // минимальное расстояние 0.5 м
+    if (rssi > txPower) return 0.1; // Очень близко
+    
+    // Используем более реалистичную модель затухания для внутренних помещений
+    constexpr double n = 2.2;  // Коэффициент затухания для офисных помещений
+    constexpr double A = 2.0;   // Константа затухания на 1 метре (дБ)
+    
+    double distance = std::pow(10.0, (A + txPower - rssi) / (10.0 * n));
+    
+    // Ограничиваем разумными пределами
+    return std::clamp(distance, 0.1, 100.0);
 }
 
-// --- EMA координат ---
+// --- EMA координат с адаптивным коэффициентом ---
 std::pair<double, double> Navigator::applyPositionEMA(
     const std::pair<double, double>& newPos) const {
     if (!lastPositionInitialized_) {
@@ -122,11 +168,22 @@ std::pair<double, double> Navigator::applyPositionEMA(
         lastPositionInitialized_ = true;
         return newPos;
     }
-    double alpha = 0.65;  // сильнее учитываем новое измерение
-    lastPosition_.first =
-        alpha * newPos.first + (1 - alpha) * lastPosition_.first;
-    lastPosition_.second =
-        alpha * newPos.second + (1 - alpha) * lastPosition_.second;
+    
+    // Вычисляем расстояние до предыдущей позиции
+    double dx = newPos.first - lastPosition_.first;
+    double dy = newPos.second - lastPosition_.second;
+    double distance = std::sqrt(dx * dx + dy * dy);
+    
+    // Адаптивный коэффициент: если изменение большое, доверяем меньше
+    double alpha = positionAlpha_;
+    if (distance > 5.0) {
+        alpha = std::max(0.1, positionAlpha_ * (5.0 / distance));
+    } else if (distance < 0.5) {
+        alpha = std::min(0.9, positionAlpha_ * 1.5);
+    }
+    
+    lastPosition_.first = alpha * newPos.first + (1 - alpha) * lastPosition_.first;
+    lastPosition_.second = alpha * newPos.second + (1 - alpha) * lastPosition_.second;
     return lastPosition_;
 }
 
@@ -146,32 +203,42 @@ std::pair<double, double> Navigator::trilateration(
     x /= distances.size();
     y /= distances.size();
 
-    // Градиентный спуск
-    int maxIter = 200;
-    double lr = 0.2;
-    double tol = 1e-4;
+    // Улучшенный градиентный спуск с адаптивным шагом
+    int maxIter = 500;
+    double lr = 0.5;
+    double tol = 1e-6;
+    double decay = 0.99;  // Уменьшение шага обучения
 
     for (int iter = 0; iter < maxIter; ++iter) {
         double gx = 0, gy = 0;
+        double totalWeight = 0;
 
-        for (auto& d : distances) {
+        for (const auto& d : distances) {
             double dx = x - d.first.x_;
             double dy = y - d.first.y_;
             double dist = std::sqrt(dx * dx + dy * dy) + 1e-9;
             double err = dist - d.second;
+            
+            // Весовая функция: больший вес для ближних маяков
+            double weight = 1.0 / (1.0 + d.second);
+            totalWeight += weight;
 
-            // Равные веса
-            gx += err * dx / dist;
-            gy += err * dy / dist;
+            gx += weight * err * dx / dist;
+            gy += weight * err * dy / dist;
         }
 
-        gx /= distances.size();
-        gy /= distances.size();
+        if (totalWeight > 0) {
+            gx /= totalWeight;
+            gy /= totalWeight;
+        }
 
-        x -= lr * gx;
-        y -= lr * gy;
+        double stepSize = lr * std::exp(-decay * iter);
+        x -= stepSize * gx;
+        y -= stepSize * gy;
 
-        if (std::sqrt((lr * gx) * (lr * gx) + (lr * gy) * (lr * gy)) < tol)
+        // Проверка сходимости
+        double gradNorm = std::sqrt(gx * gx + gy * gy);
+        if (gradNorm < tol)
             break;
     }
 

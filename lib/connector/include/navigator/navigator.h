@@ -15,11 +15,9 @@ class Navigator {
 
     void setKnownBeacons(std::vector<message_objects::BLEBeacon> newBeacons);
 
-    // Вектор: {имя маяка, список состояний}, возвращает сглаженные координаты
+    // Принимает список состояний маяков, возвращает сглаженные координаты  
     std::pair<double, double> calculatePosition(
-        std::vector<std::pair<std::string,
-                              std::vector<message_objects::BLEBeaconState>>>&
-            beaconMeasurements);
+        const std::vector<message_objects::BLEBeaconState>& beaconStates);
 
    private:
     // Список известных маяков

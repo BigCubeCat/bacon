@@ -396,15 +396,27 @@ void MqttClient::dataProcessingLoop() {
             }
         }
 
-        if (navigator_ && !collected_data.empty()) {
-            try {
-                auto position = navigator_->calculatePosition(collected_data);
-                QPointF pos(position.first, position.second);
+        // Если есть данные для обработки
+        if (!collected_data.empty()) {
+            // Преобразуем данные для навигатора
+            std::vector<message_objects::BLEBeaconState> all_states;
+            for (const auto& pair : collected_data) {
+                for (const auto& state : pair.second) {
+                    all_states.push_back(state);
+                }
+            }
 
-                emit addPathPoint(pos);
-            } catch (const std::exception& e) {
-                std::cerr << "Error calculating position: " << e.what()
-                          << std::endl;
+            // Вызываем calculatePosition если есть навигатор и данные
+            if (navigator_ && !all_states.empty()) {
+                try {
+                    auto position = navigator_->calculatePosition(all_states);
+                    QPointF pos(position.first, position.second);
+                    
+                    // Испускаем сигнал с результатом
+                    emit addPathPoint(pos);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error calculating position: " << e.what() << std::endl;
+                }
             }
         }
     }
