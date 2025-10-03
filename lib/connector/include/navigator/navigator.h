@@ -11,13 +11,16 @@ class Navigator {
    public:
     // Конструктор принимает список известных маяков и коэффициент сглаживания для расстояний
     Navigator(const std::vector<message_objects::BLEBeacon>& knownBeacons,
-              double alpha = 0.2, double positionAlpha = 0.3);
+              double alpha = 0.5, double positionAlpha = 0.25);
 
     void setKnownBeacons(std::vector<message_objects::BLEBeacon> newBeacons);
 
     // Принимает список состояний маяков, возвращает сглаженные координаты  
     std::pair<double, double> calculatePosition(
         const std::vector<message_objects::BLEBeaconState>& beaconStates);
+    
+    // Калибровка масштаба расстояний
+    void setDistanceCalibration(double calibrationFactor, double scaleFactor = 1.0);
 
    private:
     // Список известных маяков
@@ -35,6 +38,10 @@ class Navigator {
     // Последняя вычисленная позиция для EMA координат
     mutable std::pair<double, double> lastPosition_;
     mutable bool lastPositionInitialized_ = false;
+
+    // Калибровочные параметры
+    double calibrationFactor_ = 5.0;  // Калибровочная константа
+    double scaleFactor_ = 0.8;        // Коэффициент масштабирования
 
     // Преобразование RSSI → расстояние
     double rssiToDistance(int rssi, int txPower) const;

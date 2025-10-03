@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <unordered_map>
 #include <algorithm>
+#include <iostream>
 
 using namespace message_objects;
 
@@ -42,6 +43,11 @@ std::pair<double, double> Navigator::calculatePosition(
         double distance = rssiToDistance(state.rssi_, state.txPower_);
         if (distance > 0.1 && distance <= 50.0) { // Разумные пределы расстояния
             beaconDistances[state.name_].push_back(distance);
+            // Отладочный вывод для проверки масштаба
+            std::cout << "Beacon: " << state.name_ 
+                     << ", RSSI: " << state.rssi_ 
+                     << ", TxPower: " << state.txPower_
+                     << ", Distance: " << distance << " m" << std::endl;
         }
     }
 
@@ -146,18 +152,30 @@ double Navigator::updateMovingAverage(const std::string& beaconName,
     }
 }
 
-// --- RSSI → расстояние (улучшенная формула) ---
+// --- RSSI → расстояние (калиброванная формула для BLE) ---
 double Navigator::rssiToDistance(int rssi, int txPower) const {
-    if (rssi > txPower) return 0.1; // Очень близко
+    if (rssi == 0) return -1.0; // Нет сигнала
     
-    // Используем более реалистичную модель затухания для внутренних помещений
-    constexpr double n = 2.2;  // Коэффициент затухания для офисных помещений
-    constexpr double A = 2.0;   // Константа затухания на 1 метре (дБ)
+    // Адаптивная обработка случая когда RSSI > txPower
+    if (rssi > txPower) {
+        // Вместо фиксированного 0.1, используем небольшое расстояние основанное на разности
+        return 0.1 + (rssi - txPower) * 0.01;
+    }
     
-    double distance = std::pow(10.0, (A + txPower - rssi) / (10.0 * n));
+    // Калиброванная формула для реальных условий
+    // Часто txPower указывается неточно, поэтому добавляем калибровочную константу
+    constexpr double n = 2.5;      // Коэффициент затухания для офисных помещений с препятствиями
+    constexpr double calibration = 5.0;  // Калибровочная константа (подбирается экспериментально)
+    
+    // Улучшенная формула с калибровкой
+    double ratio = (double)(txPower + calibration - rssi) / (10.0 * n);
+    double distance = std::pow(10.0, ratio);
+    
+    // Применяем дополнительный коэффициент масштабирования если нужно
+    distance *= 0.8;  // Уменьшаем на 20% для компенсации переоценки
     
     // Ограничиваем разумными пределами
-    return std::clamp(distance, 0.1, 100.0);
+    return std::clamp(distance, 0.1, 50.0);
 }
 
 // --- EMA координат с адаптивным коэффициентом ---
@@ -219,8 +237,8 @@ std::pair<double, double> Navigator::trilateration(
             double dist = std::sqrt(dx * dx + dy * dy) + 1e-9;
             double err = dist - d.second;
             
-            // Весовая функция: больший вес для ближних маяков
-            double weight = 1.0 / (1.0 + d.second);
+            // Улучшенная весовая функция: обратно пропорционально квадрату расстояния
+            double weight = 1.0 / (d.second * d.second + 0.1); // +0.1 для избежания деления на ноль
             totalWeight += weight;
 
             gx += weight * err * dx / dist;
@@ -240,6 +258,14 @@ std::pair<double, double> Navigator::trilateration(
         double gradNorm = std::sqrt(gx * gx + gy * gy);
         if (gradNorm < tol)
             break;
+    }
+
+    // Отладочный вывод результата триангуляции
+    std::cout << "Trilateration result: (" << x << ", " << y << ") from " 
+              << distances.size() << " beacons" << std::endl;
+    for (const auto& d : distances) {
+        std::cout << "  Beacon " << d.first.name_ << " at (" << d.first.x_ 
+                  << ", " << d.first.y_ << ") distance: " << d.second << " m" << std::endl;
     }
 
     return {x, y};
