@@ -49,6 +49,8 @@ class Model : public QObject {
 
     void urlChanged(const QString& url);
 
+    void satPath();
+
    private:
     QList<Beacon> m_beacons;
     EspObject m_esp;

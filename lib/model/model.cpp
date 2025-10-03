@@ -95,7 +95,7 @@ void Model::onUrlChanged(const QString &url) {
 
 void Model::setPath(const QList<QPointF>& path) {
     m_path = path;
-    emit pathChanged();
+    emit satPath();
 }
 
 void Model::onStopped() {
