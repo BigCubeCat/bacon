@@ -33,7 +33,7 @@ void Model::addPointToPath(const QPointF& pos) {
     if (!m_running) {
         return;
     }
-    QPointF p = pos;
+    QPointF p = pos * 2.5;
     m_path.append(p);
     m_esp.setPos(p);
     emit dataChanged();

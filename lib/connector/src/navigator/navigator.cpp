@@ -4,6 +4,7 @@
 #include <cmath>
 #include <numeric>
 #include <stdexcept>
+#include <iostream>
 #include <unordered_map>
 
 using namespace message_objects;
@@ -39,6 +40,7 @@ std::pair<double, double> Navigator::calculatePosition(
         std::vector<double> measuredDistances;
         for (const auto& measurement : measurements) {
             double d = rssiToDistance(measurement.rssi_, measurement.txPower_);
+            std::cout << "name:" << beaconName << " " << "dist: " << d << std::endl;
             if (d <= 30.0)
                 measuredDistances.push_back(d);  // отбрасываем шум
         }
@@ -109,8 +111,8 @@ double Navigator::updateMovingAverage(const std::string& beaconName,
 
 // --- RSSI → расстояние (переписано) ---
 double Navigator::rssiToDistance(int rssi, int txPower) const {
-    constexpr double n = 3.0;  // indoor, меньше чем 3
-    double distance = std::pow(10.0, (txPower - rssi) / (10.0 * n));
+    constexpr double n = 3.3;  // indoor, меньше чем 3
+    double distance = std::pow(10.0, (-52 - rssi) / (10.0 * n));
     return std::max(distance, 0.5);  // минимальное расстояние 0.5 м
 }
 
