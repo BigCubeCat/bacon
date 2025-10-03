@@ -1,43 +1,60 @@
 #pragma once
-
-#include <vector>
-#include <string>
-#include <utility>
-#include <unordered_map>
 #include "message_objects/BLE.h"
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace navigator {
-    class Navigator {
-    public:
-        // Конструктор принимает список известных маяков и коэффициент сглаживания
-        Navigator(const std::vector<message_objects::BLEBeacon> &knownBeacons,
-                double alpha = 0.2);
 
-        // Теперь сюда передаётся вектор {имя маяка, список состояний}
-        std::pair<double, double> calculatePosition(
-            const std::vector<std::pair<std::string, std::vector<message_objects::BLEBeaconState>>> &beaconMeasurements);
+class Navigator {
+   public:
+    // Конструктор принимает список известных маяков и коэффициент сглаживания для расстояний
+    Navigator(const std::vector<message_objects::BLEBeacon>& knownBeacons,
+              double alpha = 0.2, double positionAlpha = 0.3);
 
-        void setKnownBeacons(std::vector<message_objects::BLEBeacon> newBeacons);
+    void setKnownBeacons(std::vector<message_objects::BLEBeacon> newBeacons);
 
-    private:
-        // Список известных маяков
-        std::vector<message_objects::BLEBeacon> knownBeacons_;
+    // Вектор: {имя маяка, список состояний}, возвращает сглаженные координаты
+    std::pair<double, double> calculatePosition(
+        std::vector<std::pair<std::string,
+                              std::vector<message_objects::BLEBeaconState>>>&
+            beaconMeasurements);
 
-        // Параметр сглаживания для EMA
-        double alpha_;
+   private:
+    // Список известных маяков
+    std::vector<message_objects::BLEBeacon> knownBeacons_;
 
-        // Карта "имя маяка → сглаженное значение расстояния"
-        mutable std::unordered_map<std::string, double> emaMap_;
+    // Коэффициент EMA для расстояний
+    double alpha_;
 
-        // Конвертация RSSI → расстояние
-        double rssiToDistance(int rssi, int txPower) const;
+    // Коэффициент EMA для координат
+    double positionAlpha_;
 
-        double calculateMedian(std::vector<double> &values) const;
+    // Карта "имя маяка → сглаженное значение расстояния"
+    mutable std::unordered_map<std::string, double> emaMap_;
 
-        double updateMovingAverage(const std::string &beaconName, double newValue);
+    // Последняя вычисленная позиция для EMA координат
+    mutable std::pair<double, double> lastPosition_;
+    mutable bool lastPositionInitialized_ = false;
 
-        // Триангуляция по сглаженным расстояниям
-        std::pair<double, double> trilateration(
-            const std::vector<std::pair<message_objects::BLEBeacon, double>> &distances) const;
-    };
-}
+    // Преобразование RSSI → расстояние
+    double rssiToDistance(int rssi, int txPower) const;
+
+    // Фильтрация и медиана с IQR
+    double calculateMedian(std::vector<double>& values) const;
+
+    // Адаптивный EMA для расстояний
+    double updateMovingAverage(const std::string& beaconName, double newValue);
+
+    // EMA на координаты
+    std::pair<double, double> applyPositionEMA(
+        const std::pair<double, double>& newPos) const;
+
+    // Триангуляция по сглаженным расстояниям (взвешенная)
+    std::pair<double, double> trilateration(
+        std::vector<std::pair<message_objects::BLEBeacon, double>>& distances)
+        const;
+};
+
+}  // namespace navigator
