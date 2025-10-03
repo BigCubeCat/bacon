@@ -3,19 +3,19 @@
 #include <mqtt/async_client.h>
 #include <mqtt/message.h>
 #include <algorithm>
+#include <chrono>
 #include <fstream>
 #include <sstream>
-#include <chrono>
 
 #include <QPointF>
 
 namespace mqtt_connector {
 
-MqttClient::MqttClient() 
-    : connection_manager_(std::make_unique<ConnectionManager>())
-    , message_handler_(std::make_unique<MessageHandler>())
-    , initialized_(false) {
-        navigator_ = std::make_unique<navigator::Navigator>(m_beacons);
+MqttClient::MqttClient()
+    : connection_manager_(std::make_unique<ConnectionManager>()),
+      message_handler_(std::make_unique<MessageHandler>()),
+      initialized_(false) {
+    navigator_ = std::make_unique<navigator::Navigator>(m_beacons);
 }
 
 MqttClient::~MqttClient() {
@@ -26,9 +26,9 @@ bool MqttClient::initialize(const ConnectionConfig& config) {
     if (initialized_) {
         shutdown();
     }
-    
+
     current_config_ = config;
-    
+
     connection_manager_->setConnectionCallback([this](ConnectionState state) {
         if (state == ConnectionState::CONNECTED) {
             restoreSubscriptions();
@@ -36,12 +36,12 @@ bool MqttClient::initialize(const ConnectionConfig& config) {
     });
 
     connection_manager_->setMqttClient(this);
-    
+
     if (!connection_manager_->connect(config)) {
         emit setConnectStatus("Disconnected");
         return false;
     }
-    
+
     initialized_ = true;
 
     // subscribe("hakaton/board", 1, [this, &out](const Message& msg) {
@@ -71,7 +71,7 @@ void MqttClient::shutdown() {
     if (!initialized_) {
         return;
     }
-    
+
     {
         std::lock_guard<std::mutex> lock(subscriptions_mutex_);
         for (const auto& topic : subscriptions_) {
@@ -89,41 +89,43 @@ void MqttClient::shutdown() {
         }
         subscriptions_.clear();
     }
-    
+
     connection_manager_->disconnect();
     message_handler_->clearHandlers();
-    
+
     initialized_ = false;
 }
 
-bool MqttClient::subscribe(const std::string& topic, int qos, MessageCallback callback) {
+bool MqttClient::subscribe(const std::string& topic, int qos,
+                           MessageCallback callback) {
     if (!initialized_ || !connection_manager_->isConnected()) {
         return false;
     }
-    
+
     try {
         auto client = connection_manager_->getClient();
         if (!client) {
             return false;
         }
-        
+
         if (callback) {
             message_handler_->registerHandler(topic, callback);
         }
-        
+
         auto token = client->subscribe(topic, qos);
         token->wait_for(std::chrono::seconds(10));
-        
+
         if (token->get_return_code() == mqtt::ReasonCode::SUCCESS) {
             std::lock_guard<std::mutex> lock(subscriptions_mutex_);
-            if (std::find(subscriptions_.begin(), subscriptions_.end(), topic) == subscriptions_.end()) {
+            if (std::find(subscriptions_.begin(), subscriptions_.end(),
+                          topic) == subscriptions_.end()) {
                 subscriptions_.push_back(topic);
             }
             return true;
         }
-        
+
         return false;
-        
+
     } catch (const std::exception& e) {
         connection_manager_->setErrorCallback([e](const std::string&) {
             // Обработка ошибки подписки
@@ -136,30 +138,29 @@ bool MqttClient::unsubscribe(const std::string& topic) {
     if (!initialized_ || !connection_manager_->isConnected()) {
         return false;
     }
-    
+
     try {
         auto client = connection_manager_->getClient();
         if (!client) {
             return false;
         }
-        
+
         auto token = client->unsubscribe(topic);
         token->wait_for(std::chrono::seconds(10));
-        
+
         if (token->get_return_code() == mqtt::ReasonCode::SUCCESS) {
             message_handler_->unregisterHandler(topic);
-            
+
             std::lock_guard<std::mutex> lock(subscriptions_mutex_);
-            subscriptions_.erase(
-                std::remove(subscriptions_.begin(), subscriptions_.end(), topic),
-                subscriptions_.end()
-            );
-            
+            subscriptions_.erase(std::remove(subscriptions_.begin(),
+                                             subscriptions_.end(), topic),
+                                 subscriptions_.end());
+
             return true;
         }
-        
+
         return false;
-        
+
     } catch (const std::exception&) {
         return false;
     }
@@ -169,28 +170,29 @@ bool MqttClient::publish(const Message& message) {
     if (!initialized_ || !connection_manager_->isConnected()) {
         return false;
     }
-    
+
     try {
         auto client = connection_manager_->getClient();
         if (!client) {
             return false;
         }
-        
+
         auto mqtt_msg = mqtt::make_message(message.topic, message.payload);
         mqtt_msg->set_qos(message.qos);
         mqtt_msg->set_retained(message.retained);
-        
+
         auto token = client->publish(mqtt_msg);
         token->wait_for(std::chrono::seconds(10));
-        
+
         return token->get_return_code() == mqtt::ReasonCode::SUCCESS;
-        
+
     } catch (const std::exception&) {
         return false;
     }
 }
 
-bool MqttClient::publish(const std::string& topic, const std::string& payload, int qos, bool retained) {
+bool MqttClient::publish(const std::string& topic, const std::string& payload,
+                         int qos, bool retained) {
     return publish(Message(topic, payload, qos, retained));
 }
 
@@ -234,24 +236,35 @@ void MqttClient::setAutoReconnect(bool enable, int retry_interval) {
 
 std::string MqttClient::getStatus() const {
     std::ostringstream status;
-    
+
     status << "MQTT Client Status:\n";
     status << "  Initialized: " << (initialized_ ? "Yes" : "No") << "\n";
     status << "  Connected: " << (isConnected() ? "Yes" : "No") << "\n";
     status << "  State: ";
-    
+
     switch (getConnectionState()) {
-        case ConnectionState::DISCONNECTED: status << "Disconnected"; break;
-        case ConnectionState::CONNECTING: status << "Connecting"; break;
-        case ConnectionState::CONNECTED: status << "Connected"; break;
-        case ConnectionState::RECONNECTING: status << "Reconnecting"; break;
-        case ConnectionState::FAILED: status << "Failed"; break;
+        case ConnectionState::DISCONNECTED:
+            status << "Disconnected";
+            break;
+        case ConnectionState::CONNECTING:
+            status << "Connecting";
+            break;
+        case ConnectionState::CONNECTED:
+            status << "Connected";
+            break;
+        case ConnectionState::RECONNECTING:
+            status << "Reconnecting";
+            break;
+        case ConnectionState::FAILED:
+            status << "Failed";
+            break;
     }
-    
+
     status << "\n";
-    status << "  Broker: " << current_config_.broker_host << ":" << current_config_.broker_port << "\n";
+    status << "  Broker: " << current_config_.broker_host << ":"
+           << current_config_.broker_port << "\n";
     status << "  Client ID: " << current_config_.client_id << "\n";
-    
+
     {
         std::lock_guard<std::mutex> lock(subscriptions_mutex_);
         status << "  Active subscriptions: " << subscriptions_.size() << "\n";
@@ -259,35 +272,39 @@ std::string MqttClient::getStatus() const {
             status << "    - " << topic << "\n";
         }
     }
-    
+
     if (connection_manager_) {
         auto lastError = connection_manager_->getLastError();
         if (!lastError.empty()) {
             status << "  Last error: " << lastError << "\n";
         }
     }
-    
+
     return status.str();
 }
 
-void MqttClient::setBLEBeaconState(const std::string& key, const std::vector<message_objects::BLEBeaconState>& states) {
+void MqttClient::setBLEBeaconState(
+    const std::string& key,
+    const std::vector<message_objects::BLEBeaconState>& states) {
     std::lock_guard<std::mutex> lock(m_data_mutex_);
     m_data[key] = states;
 }
 
-void MqttClient::addBLEBeaconState(const std::string& key, const message_objects::BLEBeaconState& state) {
+void MqttClient::addBLEBeaconState(
+    const std::string& key, const message_objects::BLEBeaconState& state) {
     std::lock_guard<std::mutex> lock(m_data_mutex_);
     m_data[key].push_back(state);
 }
 
 bool MqttClient::BLEBeaconContains(const std::string& name) {
     std::lock_guard<std::mutex> lock(m_beacons_mutex_);
-    return std::any_of(m_beacons.begin(), m_beacons.end(), [&name](const message_objects::BLEBeacon& beacon) {
-        return beacon.name_ == name;
-    });
+    return std::any_of(m_beacons.begin(), m_beacons.end(),
+                       [&name](const message_objects::BLEBeacon& beacon) {
+                           return beacon.name_ == name;
+                       });
 }
 
-void MqttClient::initOnChange(const QString &url) {
+void MqttClient::initOnChange(const QString& url) {
     QStringList parts = url.split(':');
     ConnectionConfig config;
 
@@ -296,10 +313,10 @@ void MqttClient::initOnChange(const QString &url) {
         config.broker_port = parts[1].toInt();
     } else {
         config.broker_host = url.toStdString();
-        config.broker_port = 1883; // стандартный порт MQTT
+        config.broker_port = 1883;  // стандартный порт MQTT
     }
-    
-    config.client_id = "client_id"; 
+
+    config.client_id = "client_id";
     config.keep_alive_interval = 60;
     config.clean_session = true;
     config.connection_timeout = 30;
@@ -313,16 +330,18 @@ void MqttClient::setFreqOnChange(float freq) {
     m_freq = freq;
 }
 
-void MqttClient::setBeacons(const QList<QPair<QString, QPointF>> &newBeacons) {
+void MqttClient::setBeacons(const QList<QPair<QString, QPointF>>& newBeacons) {
     std::lock_guard<std::mutex> lock(m_beacons_mutex_);
     m_beacons.clear();
     for (const auto& pair : newBeacons) {
+        std::cout << pair.first.toStdString() << std::endl;
         message_objects::BLEBeacon beacon;
         beacon.name_ = pair.first.toStdString();
         beacon.x_ = pair.second.x();
         beacon.y_ = pair.second.y();
         m_beacons.push_back(beacon);
     }
+    navigator_->setKnownBeacons(m_beacons);
 }
 
 void MqttClient::onMessageReceived(const Message& message) {
@@ -331,7 +350,7 @@ void MqttClient::onMessageReceived(const Message& message) {
 
 void MqttClient::restoreSubscriptions() {
     std::lock_guard<std::mutex> lock(subscriptions_mutex_);
-    
+
     for (const auto& topic : subscriptions_) {
         try {
             auto client = connection_manager_->getClient();
@@ -352,19 +371,24 @@ void MqttClient::dataProcessingLoop() {
             std::lock_guard<std::mutex> freq_lock(m_freq_mutex_);
             current_freq = m_freq;
         }
-        
-        auto wait_duration = std::chrono::milliseconds(static_cast<int>(1000.0f / current_freq));
-        
-        if (processing_cv_.wait_for(lock, wait_duration) == std::cv_status::no_timeout) {
+
+        auto wait_duration =
+            std::chrono::milliseconds(static_cast<int>(1000.0f / current_freq));
+
+        if (processing_cv_.wait_for(lock, wait_duration) ==
+            std::cv_status::no_timeout) {
             if (should_stop_processing_) {
                 break;
             }
         }
 
-        std::vector<std::pair<std::string, std::vector<message_objects::BLEBeaconState>>> collected_data;
+        std::vector<std::pair<std::string,
+                              std::vector<message_objects::BLEBeaconState>>>
+            collected_data;
         {
             std::lock_guard<std::mutex> data_lock(m_data_mutex_);
             if (!m_data.empty()) {
+                std::cout << m_data.size() << std::endl;
                 for (const auto& pair : m_data) {
                     collected_data.emplace_back(pair.first, pair.second);
                 }
@@ -376,13 +400,14 @@ void MqttClient::dataProcessingLoop() {
             try {
                 auto position = navigator_->calculatePosition(collected_data);
                 QPointF pos(position.first, position.second);
-                    
+
                 emit addPathPoint(pos);
             } catch (const std::exception& e) {
-                std::cerr << "Error calculating position: " << e.what() << std::endl;
+                std::cerr << "Error calculating position: " << e.what()
+                          << std::endl;
             }
         }
     }
 }
 
-} // namespace mqtt_connector
+}  // namespace mqtt_connector

@@ -17,6 +17,8 @@ namespace navigator {
         std::pair<double, double> calculatePosition(
             const std::vector<std::pair<std::string, std::vector<message_objects::BLEBeaconState>>> &beaconMeasurements);
 
+        void setKnownBeacons(std::vector<message_objects::BLEBeacon> newBeacons);
+
     private:
         // Список известных маяков
         std::vector<message_objects::BLEBeacon> knownBeacons_;
