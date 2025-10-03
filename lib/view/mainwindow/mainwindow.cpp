@@ -61,6 +61,9 @@ MainWindow::MainWindow(Model* model, QWidget* parent)
     connect(m_model, &Model::pathChanged, m_scene,
             &Scene::onPathChanged);
 
+    connect(m_model, &Model::satPath, m_scene,
+            &Scene::onPathSeted);
+
     connect(m_pathController, &PathController::pathReseted, m_model,
             &Model::onResetPath);
 

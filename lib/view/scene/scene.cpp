@@ -113,3 +113,8 @@ void Scene::onPathChanged() {
     m_scene->addItem(m_pathItems);
     update();
 }
+
+void Scene::onPathSeted() {
+    onPathChanged();
+    espChanged();
+}

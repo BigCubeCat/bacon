@@ -45,6 +45,8 @@ class Scene : public QWidget {
     void espChanged();
 
     void onPathChanged();
+
+    void onPathSeted();
 };
 
 #endif  //APP_SCENE_HPP
